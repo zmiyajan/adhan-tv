@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only: lets adb fire a real alarm, to test the adhan over other apps. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <receiver android:name=".schedule.TestReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="app.adhantv.TEST" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
