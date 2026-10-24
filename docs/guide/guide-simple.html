@@ -24,6 +24,7 @@ p{margin:0 0 3mm}
 .cover{display:flex;flex-direction:column;justify-content:center;text-align:center;align-items:center}
 .verse{font-family:Hafs;font-size:22pt;color:var(--gold);margin:8mm 0 2mm}
 .shot{width:100%;border-radius:3mm;border:.3mm solid var(--line);display:block}
+.crop{height:66mm;object-fit:cover;object-position:50% 40%}
 .who{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
 .card{background:var(--card);border:.3mm solid var(--line);border-radius:4mm;padding:5mm 6mm}
 .card .ic{font-size:22pt;line-height:1;margin-bottom:2mm}
@@ -50,7 +51,7 @@ p{margin:0 0 3mm}
   <p style="font-size:16pt;max-width:150mm">التلفزيون يذكّرك بالصلاة.<br>وقت الأذان يوقف اللي شغّال، ويرفع الأذان على الشاشة.</p>
   <div class="verse">﴿{{4:103:14}}﴾</div>
   <p style="font-size:11pt;color:var(--mute)">النساء · 103</p>
-  <img class="shot" style="margin-top:10mm" src="../screenshots/9-adhan-screen.png" alt="">
+  <img class="shot" style="margin-top:10mm" src="../screenshots/10-adhan-screen.png" alt="">
   <div class="chips"><span>مجاني</span><span>بدون إعلانات</span><span>بدون تسجيل</span><span>لتلفزيونات أندرويد وجوجل</span></div>
 </section>
 
@@ -74,10 +75,10 @@ p{margin:0 0 3mm}
   <div class="big"><div class="n">1</div><p><b class="g">يوقف اللي شغّال.</b> المسلسل أو المباراة أو يوتيوب يوقف مكانه.</p></div>
   <div class="big"><div class="n">2</div><p><b class="g">يطلع الأذان على الشاشة كاملة،</b> باسم الصلاة وآية عن الصلاة بخط المصحف، وصوت الأذان.</p></div>
   <div class="big"><div class="n">3</div><p><b class="g">بعد ما يخلص،</b> ترجع للي كنت تتفرج عليه، وهو واقف لين تضغط تشغيل. ما يفوتك شي.</p></div>
-  <img class="shot" src="../screenshots/9-adhan-screen.png" alt="" style="margin:4mm 0 6mm">
+  <img class="shot" src="../screenshots/10-adhan-screen.png" alt="" style="margin:4mm 0 6mm">
   <div class="who">
     <div class="card"><h3>الأوقات صحيحة</h3><p>نفس تقويم أم القرى الرسمي، وتقدر تختار مدينتك من أي مكان في العالم.</p></div>
-    <div class="card"><h3>الصوت</h3><p>إذاعة القرآن الكريم مباشر في مكة والرياض، وأذان من الحرم في باقي المدن.</p></div>
+    <div class="card"><h3>الصوت</h3><p>أذان المسجد الحرام، أو إذاعة القرآن الكريم مباشر. وتقدر تختار غيرها.</p></div>
   </div>
   <div class="foot"><span>أذان التلفاز</span><span>3</span></div>
 </section>
@@ -88,11 +89,23 @@ p{margin:0 0 3mm}
   <img class="shot" src="../screenshots/1-today.png" alt="" style="margin-bottom:7mm">
   <div class="who">
     <div class="card"><h3>اختر الصلوات</h3><p>مثلاً تطفي أذان الفجر لأن الكل نايم، وتخلي الباقي.</p></div>
-    <div class="card"><h3>إيقاف مؤقت</h3><p>عندك ضيوف أو اجتماع؟ أوقفه ساعة أو ساعتين أو لين بكرة.</p></div>
+    <div class="card"><h3>تشغيل وإيقاف</h3><p>زر واحد يوقف الأذان كله، وترجّعه متى ما تبغى.</p></div>
     <div class="card"><h3>وقت الإقامة</h3><p>عدّل الدقايق حسب مسجد حيّكم.</p></div>
     <div class="card"><h3>الشكل</h3><p>كبّر الخط لو الكنبة بعيدة، وغيّر اللون.</p></div>
   </div>
   <div class="foot"><span>أذان التلفاز</span><span>4</span></div>
+</section>
+
+<section class="page">
+  <h2>وأكثر من الأذان</h2>
+  <p class="lead">التلفزيون يصير مثل شاشة المسجد، ويشغّل لك الإذاعة.</p>
+  <img class="shot crop" src="../screenshots/8-board.png" alt="" style="margin-bottom:5mm">
+  <div class="who" style="margin-bottom:6mm">
+    <div class="card"><h3>شاشة المسجد</h3><p>الساعة، وأوقات اليوم، والإقامة، وعدّ تنازلي للأذان الجاي. خلّها شغّالة طول اليوم.</p></div>
+    <div class="card"><h3>إذاعة القرآن الكريم</h3><p>تسمعها مباشر متى ما تبغى، وتوقف لحالها وقت الأذان.</p></div>
+  </div>
+  <img class="shot crop" src="../screenshots/9-radio.png" alt="">
+  <div class="foot"><span>أذان التلفاز</span><span>5</span></div>
 </section>
 
 <section class="page">
@@ -108,7 +121,7 @@ p{margin:0 0 3mm}
   <div class="qa"><b>يشتغل على تلفزيوني؟</b><span>على أي تلفزيون فيه Android TV أو Google TV، مثل TCL وسوني وشاومي وهايسنس، وأجهزة Chromecast.</span></div>
   <div class="qa"><b>مين سوّاه؟ وأقدر أعدّل عليه؟</b><span>انبنى بمساعدة أدوات الذكاء الاصطناعي، وكوده مفتوح للجميع. أي أحد يقدر يعدّل عليه ويضيف أفكاره.</span></div>
   <div class="qa"><b>المحتوى من وين؟</b><span>الآيات وخط المصحف من مجمع الملك فهد لطباعة المصحف الشريف، والأوقات على تقويم أم القرى.</span></div>
-  <div class="foot"><span>أذان التلفاز</span><span>5</span></div>
+  <div class="foot"><span>أذان التلفاز</span><span>6</span></div>
 </section>
 
 <section class="page cover">
