@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
-import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import app.adhantv.R
 
@@ -39,7 +38,7 @@ class AdhanSound(private val context: Context, radio: Boolean, private val onLiv
                 AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_SPEECH).build(),
                 false,   // the adhan screen already took audio focus
             )
-            setMediaItem(MediaItem.fromUri(RawResourceDataSource.buildRawResourceUri(R.raw.adhan_haram)))
+            setMediaItem(MediaItem.fromUri("android.resource://${context.packageName}/${R.raw.adhan_haram}"))
             prepare()
             play()
         }
