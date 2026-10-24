@@ -49,7 +49,8 @@ data class AppSettings(
     val sound: Set<Prayer> = Prayer.entries.toSet(),
     val adhanMinutes: Int = 4,
     val source: SoundSource = SoundSource.AUTO,
-    val voice: AdhanVoice = AdhanVoice.HARAM,
+    /** Id of the chosen recording (see [AdhanVoice]); resolved against the files on the TV when it plays. */
+    val voiceId: String = AdhanVoice.HARAM.id,
     val iqamaEnabled: Boolean = true,
     val iqamaMinutes: Map<Prayer, Int> = ScheduleSettings.DEFAULT_IQAMA,
     val iqamaSeconds: Int = 30,
@@ -124,7 +125,7 @@ class SettingsRepository(private val context: Context, private val cities: Citie
             sound = p[K.sound]?.let(::prayers) ?: d.sound,
             adhanMinutes = p[K.adhanMinutes] ?: d.adhanMinutes,
             source = p[K.source]?.let { enumOr(it, d.source) } ?: d.source,
-            voice = p[K.voice]?.let { enumOr(it, d.voice) } ?: d.voice,
+            voiceId = p[K.voice] ?: d.voiceId,
             iqamaEnabled = p[K.iqamaOn] ?: d.iqamaEnabled,
             iqamaMinutes = Prayer.entries.associateWith { p[K.iqama(it)] ?: d.iqamaMinutes.getValue(it) },
             iqamaSeconds = p[K.iqamaSeconds] ?: d.iqamaSeconds,
@@ -143,7 +144,7 @@ class SettingsRepository(private val context: Context, private val cities: Citie
         p[K.sound] = s.sound.map { it.name }.toSet()
         p[K.adhanMinutes] = s.adhanMinutes
         p[K.source] = s.source.name
-        p[K.voice] = s.voice.name
+        p[K.voice] = s.voiceId
         p[K.iqamaOn] = s.iqamaEnabled
         s.iqamaMinutes.forEach { (prayer, min) -> p[K.iqama(prayer)] = min }
         p[K.iqamaSeconds] = s.iqamaSeconds

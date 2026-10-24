@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import app.adhantv.audio.AdhanSound
+import app.adhantv.audio.AdhanVoice
 import app.adhantv.container
 import app.adhantv.prayer.Event
 import app.adhantv.prayer.Prayer
@@ -54,9 +55,10 @@ class AdhanActivity : ComponentActivity() {
             val c = container
             val s = c.settings.current()
             val override = intent.getIntExtra(SECONDS, 0) * 1000L
-            val showMs = if (override > 0) override else if (adhan) s.adhanMs(event.prayer, s.voice.durationMs(this@AdhanActivity)) else s.iqamaSeconds * 1000L
+            val voice = AdhanVoice.of(this@AdhanActivity, s.voiceId)
+            val showMs = if (override > 0) override else if (adhan) s.adhanMs(event.prayer, voice.durationMs(this@AdhanActivity)) else s.iqamaSeconds * 1000L
             Log.i("AdhanSound", "source=${s.source} city=${s.city.english} radio=${s.useRadio} sound=${event.prayer in s.sound}")
-            if (adhan && event.prayer in s.sound) sound = AdhanSound(this@AdhanActivity, s.useRadio, s.voice) { live = it }
+            if (adhan && event.prayer in s.sound) sound = AdhanSound(this@AdhanActivity, s.useRadio, voice) { live = it }
             val next = if (s.showNext) c.scheduler.schedule(s).next(Instant.now().plusMillis(showMs)) else null
             setContent { AdhanScreen(event, c.verses.adhan, showMs, s, next, live) }
             delay(showMs)

@@ -278,7 +278,11 @@ private fun Adhan(s: AppSettings, act: HomeActions) {
             "الحين: ${if (s.useRadio) "إذاعة القرآن الكريم مباشر" else "أذان مسجّل"}. ولو انقطع النت يشتغل المسجّل",
             top = true,
         ) { v -> act.change { it.copy(source = v) } }
-        ChoiceRow("الأذان المسجّل", s.voice, AdhanVoice.available(LocalContext.current), { it.label }, "يبقى على الشاشة طول مدة التسجيل") { v -> act.change { it.copy(voice = v) } }
+        val context = LocalContext.current
+        val voices = remember(s.voiceId) { AdhanVoice.available(context) }
+        ChoiceRow("الأذان المسجّل", AdhanVoice.of(context, s.voiceId), voices, { it.label }, "يبقى على الشاشة طول مدة التسجيل") { v ->
+            act.change { it.copy(voiceId = v.id) }
+        }
         ChoiceRow("مدة الأذان مع الإذاعة", s.adhanMinutes, listOf(1, 2, 3, 4, 5), { minutes(it) }) { v -> act.change { it.copy(adhanMinutes = v) } }
         ActionRow("أذانات المسجد الحرام", "قناة شبكة الشيخ فاروق حضراوي، تفتح في يوتيوب", onClick = act.haramChannel)
         Spacer(Modifier.height(10.dp))
