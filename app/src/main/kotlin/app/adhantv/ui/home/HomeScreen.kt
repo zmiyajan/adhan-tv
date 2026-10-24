@@ -146,10 +146,18 @@ fun HomeScreen(
                             )
                         }
                         Spacer(Modifier.weight(1f))
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                            Text("الإصدار $version | صُنع في مكة", style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
-                            Spacer(Modifier.width(5.dp))
-                            KaabaIcon(13.dp)
+                        // RTL: «صُنع في مكة» on the right, the version number on the left.
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("صُنع في مكة", style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
+                                Spacer(Modifier.width(5.dp))
+                                KaabaIcon(13.dp)
+                            }
+                            Text(version, style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
                         }
                     }
                     CompositionLocalProvider(LocalScrollTop provides { scope.launch { list.animateScrollToItem(0) } }) { LazyColumn(
