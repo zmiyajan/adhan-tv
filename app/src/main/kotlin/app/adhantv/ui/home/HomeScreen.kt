@@ -68,7 +68,7 @@ import java.time.temporal.ChronoUnit
 
 private enum class Section(val title: String) {
     TODAY("اليوم"),
-    CITY("المدينة والصلوات"),
+    CITY("المدينة"),
     ADHAN("الأذان"),
     IQAMA("الإقامة"),
     LOOK("الشكل"),
@@ -168,7 +168,7 @@ fun HomeScreen(
                         item { Spacer(Modifier.height(8.dp)) }
                         when (section) {
                             Section.TODAY -> item { Today(s, scheduler, hijri, act) }
-                            Section.CITY -> item { CityAndPrayers(s, resumes, act) { picking = true } }
+                            Section.CITY -> item { CityAndPrayers(s, act) { picking = true } }
                             Section.ADHAN -> item { Adhan(s, act) }
                             Section.IQAMA -> item { Iqama(s, act) }
                             Section.LOOK -> item { Look(s, act) }
@@ -252,22 +252,16 @@ private fun Today(s: AppSettings, scheduler: AlarmScheduler, hijri: Hijri, act: 
 }
 
 @Composable
-private fun CityAndPrayers(s: AppSettings, resumes: Int, act: HomeActions, onChooseCity: () -> Unit) {
-    val context = LocalContext.current
-    val located = remember(resumes) { Permissions.canLocate(context) }
+private fun CityAndPrayers(s: AppSettings, act: HomeActions, onChooseCity: () -> Unit) {
     Column {
         ActionRow("المدينة: ${s.city.name}", "اضغط عشان تختار من القائمة", top = true, onClick = onChooseCity)
         ActionRow("حدّد مدينتي تلقائياً", "من الواي فاي، مرة وحدة، والموقع ما يطلع من التلفزيون", onClick = act.locate)
-        ToggleRow("إذن الموقع", located, if (located) "اضغط عشان توقفه من إعدادات التلفزيون" else "يُطلب بس لما تضغط «حدّد مدينتي»") {
-            if (located) act.locationSettings() else act.locate()
-        }
         ChoiceRow("طريقة الحساب", s.method, Method.entries, { it.arabic }, "أم القرى هي التقويم الرسمي في السعودية") { m -> act.change { it.copy(method = m) } }
-        Spacer(Modifier.height(10.dp))
-        Prayer.entries.forEach { p ->
-            ToggleRow("أذان ${p.arabic()}", p in s.enabled) { on -> act.change { it.copy(enabled = if (on) it.enabled + p else it.enabled - p) } }
-        }
     }
 }
+
+/** What happens at a prayer's adhan time. */
+private enum class AdhanMode(val label: String) { SOUND("بصوت"), SILENT("بدون صوت"), OFF("متوقف") }
 
 /** One sound choice: a recording, or the live radio. */
 private data class Sound(val label: String, val voiceId: String?)
@@ -292,7 +286,19 @@ private fun Adhan(s: AppSettings, act: HomeActions) {
         }
         Spacer(Modifier.height(10.dp))
         Prayer.entries.forEach { p ->
-            ToggleRow("صوت أذان ${p.arabic()}", p in s.sound) { on -> act.change { it.copy(sound = if (on) it.sound + p else it.sound - p) } }
+            val mode = when {
+                p !in s.enabled -> AdhanMode.OFF
+                p in s.sound -> AdhanMode.SOUND
+                else -> AdhanMode.SILENT
+            }
+            ChoiceRow("أذان ${p.arabic()}", mode, AdhanMode.entries, { it.label }) { m ->
+                act.change {
+                    it.copy(
+                        enabled = if (m == AdhanMode.OFF) it.enabled - p else it.enabled + p,
+                        sound = if (m == AdhanMode.SOUND) it.sound + p else it.sound - p,
+                    )
+                }
+            }
         }
     }
 }

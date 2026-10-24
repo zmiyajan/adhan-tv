@@ -12,7 +12,9 @@ automatically by [release-please](https://github.com/googleapis/release-please) 
 * Quran Radio player you can open any time; it stops for the adhan.
 * Colour themes (black and gold, emerald, navy, silver) for the whole app and the adhan screen.
 * Two welcome slides on first launch: what the app does, then city and permission.
-* Permissions page: every permission shows its state and can be turned on or off; location sits with the city.
+* Permissions page: every permission shows its state and can be turned on or off there.
+* Simpler settings: «المدينة» holds the city, automatic location (asks for permission on first use) and the
+  method; «الأذان» holds the sound and one row per prayer: with sound, silent, or off.
 * A recorded adhan stays on screen exactly as long as it plays; the radio follows the chosen minutes.
 * «عن البرنامج»: every source opens a page with its full licence, links and QR codes; changelog; version;
   suggestions QR code; restart and reset-to-defaults.

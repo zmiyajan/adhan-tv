@@ -25,10 +25,11 @@ import java.time.Instant
 /** Opened from the TV's app list: today's times and all settings, driven by the remote. */
 class HomeActivity : ComponentActivity() {
     private var status by mutableStateOf<String?>(null)
-    private var resumes by mutableIntStateOf(0)   // re-reads permissions after the user returns from Settings
+    private var resumes by mutableIntStateOf(0)
+    private var askedLocation = false   // re-reads permissions after the user returns from Settings
 
     private val askLocation = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) locate() else status = "ما أعطيت إذن الموقع. اختر المدينة من القائمة."
+        if (granted) locate() else status = "ما أعطيت إذن الموقع. اختر المدينة من القائمة، أو فعّله من «الأذونات»."
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +56,16 @@ class HomeActivity : ComponentActivity() {
                             }
                         },
                         locate = {
-                            if (Permissions.canLocate(this)) locate() else askLocation.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                            when {
+                                Permissions.canLocate(this) -> locate()
+                                // Refused before with "don't ask again": the system dialog won't show, so open the app's settings.
+                                askedLocation && !shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) ->
+                                    if (!Permissions.openAppSettings(this)) status = "فعّل الموقع من «الأذونات»."
+                                else -> {
+                                    askedLocation = true
+                                    askLocation.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                                }
+                            }
                         },
                         pick = ::choose,
                         tryEvent = { kind -> startActivity(AdhanActivity.intent(this, Event(Prayer.MAGHRIB, kind, Instant.now(), false))) },
