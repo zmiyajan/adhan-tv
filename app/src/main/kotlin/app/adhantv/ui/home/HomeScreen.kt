@@ -353,7 +353,6 @@ private fun About(version: String, act: HomeActions) {
             style = TextStyle(fontFamily = Fonts.amiri, fontSize = 22.sp, color = Palette.gold),
             modifier = Modifier.padding(bottom = 4.dp),
         )
-        Text("صُنع بإحسان في مكة المكرمة، بواسطة زياد مياجان.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 17.sp, color = Palette.ink))
         Note("الإصدار $version · مجاني وبدون إعلانات", size = 16)
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 10.dp)) {
             Qr(SUGGESTIONS, 130.dp)
@@ -372,6 +371,7 @@ private fun About(version: String, act: HomeActions) {
             if (confirmReset) act.reset()
             confirmReset = !confirmReset
         }
+        Note("صُنع بإحسان في مكة المكرمة، بواسطة زياد مياجان.", size = 15)
     }
 }
 
