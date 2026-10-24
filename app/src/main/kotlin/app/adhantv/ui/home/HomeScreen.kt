@@ -58,6 +58,7 @@ import app.adhantv.schedule.AlarmScheduler
 import app.adhantv.ui.arabic
 import app.adhantv.ui.clockText
 import app.adhantv.ui.theme.Fonts
+import app.adhantv.ui.theme.KaabaIcon
 import app.adhantv.ui.theme.Palette
 import app.adhantv.ui.theme.Theme
 import kotlinx.coroutines.delay
@@ -145,11 +146,11 @@ fun HomeScreen(
                             )
                         }
                         Spacer(Modifier.weight(1f))
-                        Text(
-                            "الإصدار $version | صُنع في مكة",
-                            style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute, textAlign = TextAlign.Center),
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                            Text("الإصدار $version | صُنع في مكة", style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
+                            Spacer(Modifier.width(5.dp))
+                            KaabaIcon(13.dp)
+                        }
                     }
                     CompositionLocalProvider(LocalScrollTop provides { scope.launch { list.animateScrollToItem(0) } }) { LazyColumn(
                         Modifier.weight(1f).fillMaxHeight().padding(horizontal = 40.dp).onFocusChanged { inPane = it.hasFocus },
