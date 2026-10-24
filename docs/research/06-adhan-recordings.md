@@ -109,7 +109,7 @@ Other measured files, not ranked [V for numbers]:
 - Freesound 331518 (Abu Dhabi, CC0, SNR 14).
 - Freesound 342165 (CC0, SNR 18).
 - Freesound 256192 (Alexandria, CC BY 4.0, 19 s fragment, "beginning missing").
-- Freesound 36997 (Azemour, CC BY 3.0): **download truncated** at 106 KB, not measured.
+- Freesound 36997 (Azemour, CC BY 3.0): the re-downloaded 3.7 MB preview decodes to near-silence (−80 dBFS) with `afconvert`. Not measured.
 
 ### 2.2 Shia adhans: listed only as a warning
 
