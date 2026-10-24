@@ -2,6 +2,7 @@ package app.adhantv.audio
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import app.adhantv.R
 
@@ -32,7 +33,7 @@ class AdhanSound(private val context: Context, radio: Boolean, private val onLiv
         recorded = MediaPlayer.create(
             context, R.raw.adhan_haram,
             AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build(),
-            0,
+            context.getSystemService(AudioManager::class.java).generateAudioSessionId(),   // 0 is the output mix, not a session
         )?.apply { start() }
     }
 

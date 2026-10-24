@@ -2,7 +2,8 @@
 
 Source: "Maghrib Adhan at the Masjid al Haram, Mecca - 25 Feb, 2012.webm" by 3omar Faruq, CC BY 3.0
 https://commons.wikimedia.org/wiki/File:Maghrib_Adhan_at_the_Masjid_al_Haram,_Mecca_-_25_Feb,_2012.webm
-Changes (as CC BY requires us to state): audio only, trimmed to the adhan (113.5 s – 295 s), mono, short fades,
+Changes (as CC BY requires us to state): audio only, trimmed to the adhan (113.5 s – 295 s), mono, louder
+(peak-normalised), short fades,
 AAC 64 kbps. The attribution is shown in the app.
 
 Usage (macOS, uses afconvert):
@@ -26,6 +27,8 @@ with tempfile.TemporaryDirectory() as tmp:
     with wave.open(str(full)) as w:
         a = array.array("h", w.readframes(w.getnframes()))
     a = a[int(START * RATE):int(END * RATE)]
+    gain = 0.89 * 32767 / max(abs(x) for x in a)   # peak-normalise to -1 dBFS: the crowd recording is quiet
+    a = array.array("h", (int(x * gain) for x in a))
     n, fi, fo = len(a), int(FADE_IN * RATE), int(FADE_OUT * RATE)
     for i in range(fi):
         a[i] = int(a[i] * i / fi)

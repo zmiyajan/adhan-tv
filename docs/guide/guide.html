@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>أذان التلفاز: الدليل</title>
+<style>
+@font-face{font-family:Amiri;src:url(../../app/src/main/res/font/amiri_bold.ttf)}
+@font-face{font-family:Plex;src:url(../../app/src/main/res/font/plex_arabic.ttf)}
+@font-face{font-family:Hafs;src:url(../../app/src/main/res/font/kfgqpc_hafs_v30.ttf)}
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+:root{--gold:#bba27a;--ink:#ece7de;--mute:#a8a39b;--bg:#0b0b0c;--card:#17171a;--line:#2a2a2e}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:11.5pt/1.75 Plex,"Geeza Pro",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:210mm;height:297mm;overflow:hidden;padding:20mm 18mm;page-break-after:always;position:relative;background:radial-gradient(ellipse 90% 60% at 50% 30%,#18171a,#0b0b0c 70%)}
+.page:last-child{page-break-after:auto}
+h1,h2,h3{font-family:Amiri;font-weight:700;color:var(--gold);margin:0}
+h1{font-size:46pt;line-height:1.2}
+h2{font-size:24pt;margin-bottom:6mm}
+h2 small{display:block;font:11pt Plex;color:var(--mute);margin-top:1mm}
+h3{font-size:14pt;color:var(--ink);margin:5mm 0 1mm}
+p{margin:0 0 3mm}
+.mute{color:var(--mute)}
+.g{color:var(--gold)}
+.rule{width:40mm;height:.6mm;background:var(--gold);opacity:.6;margin:6mm 0}
+.cover{display:flex;flex-direction:column;justify-content:center;text-align:center;align-items:center}
+.cover .verse{font-family:Hafs;font-size:22pt;color:var(--gold);margin:8mm 0 2mm}
+.shot{width:100%;border-radius:3mm;border:.3mm solid var(--line);display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+.card{background:var(--card);border:.3mm solid var(--line);border-radius:3mm;padding:3.5mm 5mm}
+.card b{color:var(--gold);display:block;margin-bottom:1mm;font-weight:400;font-size:12.5pt}
+.fig{margin:0}
+.crop{height:52mm;object-fit:cover;object-position:50% 45%}
+.fig figcaption{font-size:10pt;color:var(--mute);margin-top:1.5mm;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:10pt}
+td,th{padding:2.2mm 2mm;border-bottom:.3mm solid var(--line);vertical-align:top;text-align:right}
+th{color:var(--gold);font-weight:400}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;position:relative;padding:0 11mm 3.5mm 0}
+.steps li::before{content:counter(s);position:absolute;right:0;top:.5mm;width:7mm;height:7mm;border-radius:50%;background:var(--gold);color:#111;font-size:10pt;display:grid;place-items:center}
+.ltr{direction:ltr;unicode-bidi:isolate;font-family:Menlo,monospace;font-size:9pt;background:#1f1f23;border-radius:1.2mm;padding:.3mm 1.5mm;color:#e6dcc8}
+pre{direction:ltr;text-align:left;background:#141417;border:.3mm solid var(--line);border-radius:2mm;padding:3mm 4mm;font:9pt/1.6 Menlo,monospace;color:#e6dcc8;margin:2mm 0 4mm;white-space:pre-wrap}
+.flow{display:flex;gap:2.5mm;align-items:stretch;margin:4mm 0 6mm}
+.flow div{flex:1;background:var(--card);border:.3mm solid var(--line);border-radius:2.5mm;padding:3mm;font-size:9.5pt;text-align:center}
+.flow div b{display:block;color:var(--gold);font-weight:400;font-size:11pt;margin-bottom:1mm}
+.foot{position:absolute;bottom:10mm;left:18mm;right:18mm;display:flex;justify-content:space-between;font-size:8.5pt;color:#6d6963}
+.badge{display:inline-block;border:.3mm solid var(--gold);color:var(--gold);border-radius:5mm;padding:.5mm 4mm;font-size:10pt}
+</style>
+</head>
+<body>
+
+<section class="page cover">
+  <span class="badge">قريباً على Google Play</span>
+  <h1 style="margin-top:10mm">أذان التلفاز</h1>
+  <div class="rule"></div>
+  <p style="font-size:14pt;max-width:140mm">الأذان والإقامة على شاشة التلفزيون في وقتها بالضبط، فوق أي شي شغّال، بصوت إذاعة القرآن الكريم أو أذان الحرم.</p>
+  <div class="verse">﴿إِنَّ ٱلصَّلَوٰةَ كَانَتۡ عَلَى ٱلۡمُؤۡمِنِينَ كِتَٰبࣰا مَّوۡقُوتࣰا﴾</div>
+  <p class="mute" style="font-size:10pt">النساء · 103</p>
+  <img class="shot" style="margin-top:12mm" src="../screenshots/9-adhan-screen.png" alt="">
+  <p class="mute" style="margin-top:10mm;font-size:10pt">مجاني · مفتوح المصدر · بدون إعلانات · لتلفزيونات Android TV و Google TV</p>
+</section>
+
+<section class="page">
+  <h2>وش يسوي البرنامج<small>كل شي يصير لحاله، وأنت تتحكم فيه بالريموت</small></h2>
+  <div class="grid">
+    <div class="card"><b>في وقته بالثانية</b>يحسب أوقات الصلاة بنفسه وبدون نت، على تقويم أم القرى الرسمي. فرقه عن التقويم الرسمي دقيقة كحد أقصى، وفيه اختبارات تتأكد من هذا.</div>
+    <div class="card"><b>فوق أي شي شغّال</b>يوتيوب، نتفلكس، القنوات: شاشة الأذان تطلع فوقها كلها بالشاشة الكاملة.</div>
+    <div class="card"><b>يوقف الفيديو</b>الفيديو اللي كان شغّال يوقف وقت الأذان، ويبقى واقف بعده، وأنت تكمّله لما تبغى.</div>
+    <div class="card"><b>الصوت حسب مدينتك</b>مكة والرياض: إذاعة القرآن الكريم مباشر. باقي المدن: أذان الحرم المسجّل. ولو ما فيه نت يشتغل المسجّل.</div>
+    <div class="card"><b>الإقامة</b>شاشة بدون صوت. المعتاد في مساجد السعودية: الفجر 25، الظهر 20، العصر 20، المغرب 10، العشاء 20 دقيقة.</div>
+    <div class="card"><b>الجمعة</b>«حان الآن موعد أذان الجمعة»، وبدون تنبيه إقامة.</div>
+    <div class="card"><b>التلفزيون مطفي؟</b>ما يسوي شي أبداً، ولا يشغّل التلفزيون.</div>
+    <div class="card"><b>خفيف</b>ما يشتغل في الخلفية. منبّه النظام يصحّيه قبل الأذان بخمس ثواني، ويرجع ينام بعده.</div>
+  </div>
+  <h3>شاشة الإقامة</h3>
+  <img class="shot crop" src="../screenshots/10-iqama-screen.png" alt="">
+  <div class="foot"><span>أذان التلفاز</span><span>2</span></div>
+</section>
+
+<section class="page">
+  <h2>الإعدادات<small>افتح «أذان التلفاز» من قائمة التطبيقات. القائمة على اليمين، والإعدادات جنبها، وOK يغيّر</small></h2>
+  <figure class="fig"><img class="shot" src="../screenshots/1-today.png" alt=""><figcaption>اليوم: أوقات الصلاة والإقامة، والصلاة الجاية، وزر «جرّب»</figcaption></figure>
+  <div class="grid" style="margin-top:5mm">
+    <figure class="fig"><img class="shot" src="../screenshots/2-prayers.png" alt=""><figcaption>الصلوات: تشغيل كل صلاة، والمدينة، وطريقة الحساب</figcaption></figure>
+    <figure class="fig"><img class="shot" src="../screenshots/3-adhan.png" alt=""><figcaption>الأذان: المدة، ومصدر الصوت، وصوت كل صلاة</figcaption></figure>
+    <figure class="fig"><img class="shot" src="../screenshots/4-iqama.png" alt=""><figcaption>الإقامة: الدقايق لكل صلاة، ومدة الشاشة</figcaption></figure>
+    <figure class="fig"><img class="shot" src="../screenshots/5-look.png" alt=""><figcaption>الشكل: لون الخط، وحجم الكلام، وسطر الصلاة القادمة</figcaption></figure>
+  </div>
+  <div class="foot"><span>أذان التلفاز</span><span>3</span></div>
+</section>
+
+<section class="page">
+  <h2>باقي الإعدادات</h2>
+  <div class="grid">
+    <figure class="fig"><img class="shot" src="../screenshots/6-pause.png" alt=""><figcaption>إيقاف مؤقت: ساعة، أو ساعتين، أو لين بكرة</figcaption></figure>
+    <figure class="fig"><img class="shot" src="../screenshots/7-permissions.png" alt=""><figcaption>الأذونات: وش مفعّل، وزر يفعّل الناقص</figcaption></figure>
+  </div>
+  <h3>تحديد المدينة</h3>
+  <p><span class="g">تلقائي:</span> «حدّد مدينتي تلقائياً» يطلب إذن الموقع التقريبي من النظام مرة وحدة. التلفزيون يعرف مكانه من الواي فاي، والبرنامج يختار أقرب مدينة. الموقع ما يطلع من التلفزيون.</p>
+  <p><span class="g">يدوي:</span> «اختر المدينة» فيه أكثر من 34 ألف مدينة حول العالم، وتبحث بالعربي أو الإنجليزي.</p>
+  <h3>الأذونات وليش يحتاجها</h3>
+  <table>
+    <tr><th>الإذن</th><th>ليش</th><th>لازم؟</th></tr>
+    <tr><td>الظهور فوق التطبيقات</td><td>عشان تطلع شاشة الأذان فوق اللي شغّال</td><td>اختياري، بدونه يطلع الأذان لما يكون البرنامج مفتوح</td></tr>
+    <tr><td>المنبهات والتذكيرات</td><td>عشان يطلع الأذان في ثانيته</td><td>مفعّل في أغلب التلفزيونات</td></tr>
+    <tr><td>الموقع التقريبي</td><td>لتحديد المدينة مرة وحدة</td><td>اختياري</td></tr>
+    <tr><td>الإنترنت</td><td>لصوت الإذاعة بس</td><td>—</td></tr>
+  </table>
+  <div class="foot"><span>أذان التلفاز</span><span>4</span></div>
+</section>
+
+<section class="page">
+  <h2>كيف يشتغل وقت الأذان</h2>
+  <div class="flow">
+    <div><b>قبل بـ 5 ثواني</b>منبّه النظام يصحّي البرنامج</div>
+    <div><b>التلفزيون شغّال؟</b>لو مطفي أو الأذان موقوف، ما يسوي شي</div>
+    <div><b>الثانية بالضبط</b>يوقف الفيديو، وتطلع الشاشة</div>
+    <div><b>بعدها بثانية ونص</b>يطلع الصوت</div>
+    <div><b>بعد المدة</b>تقفل الشاشة، والفيديو يبقى واقف</div>
+  </div>
+  <h3>ليش الإذاعة صارت أسرع من أليكسا؟</h3>
+  <p>مشغّل الصوت العادي في التلفزيون ينتظر خمس ثواني قبل ما يبدأ، والإذاعة أول ما تتصل فيها ترسل ست ثواني صوت قديم. يعني الصوت كان متأخر حوالي 11 ثانية. البرنامج يسحب البث بنفسه ويتخطّى الصوت القديم، فيبدأ خلال ثانية ونص، ومتأخر ثانية وحدة بس عن البث.</p>
+  <h3>ليش الإذاعة في مكة والرياض بس؟</h3>
+  <p>إذاعة القرآن الكريم تنقل أذان مكة والرياض. في المدن الثانية ممكن يكون وقتها مختلف عن وقت أذانك، فيشتغل أذان الحرم المسجّل في الثانية نفسها. وتقدر تغيّر المصدر من قسم الأذان.</p>
+  <h3>المصادر</h3>
+  <table>
+    <tr><th>الشي</th><th>المصدر</th><th>الرخصة</th></tr>
+    <tr><td>خط المصحف ونص الآيات</td><td>مجمع الملك فهد لطباعة المصحف الشريف، الملف الأصلي بدون أي تعديل</td><td>رخصة المجمع: استخدام ونسخ وتوزيع مجاني</td></tr>
+    <tr><td>أوقات الصلاة</td><td>تقويم أم القرى، بمكتبة adhan</td><td>MIT</td></tr>
+    <tr><td>الأذان المسجّل</td><td>أذان المغرب في المسجد الحرام، تسجيل 3omar Faruq على Wikimedia Commons</td><td>CC BY 3.0</td></tr>
+    <tr><td>إذاعة القرآن الكريم</td><td>هيئة الإذاعة والتلفزيون</td><td>بث مباشر، ما ينحفظ</td></tr>
+    <tr><td>قائمة المدن</td><td>GeoNames</td><td>CC BY 4.0</td></tr>
+    <tr><td>الخطوط</td><td>أميري و IBM Plex Sans Arabic</td><td>SIL OFL</td></tr>
+  </table>
+  <p class="mute" style="margin-top:3mm;font-size:10pt">النص القرآني ما ينكتب باليد أبداً: ينسحب برمجياً من ملفات المجمع الرسمية.</p>
+  <div class="foot"><span>أذان التلفاز</span><span>5</span></div>
+</section>
+
+<section class="page">
+  <h2>التنزيل على التلفزيون<small>إلى أن ينزل في المتجر، تنزّله من GitHub</small></h2>
+  <h3>من التلفزيون نفسه</h3>
+  <ol class="steps">
+    <li>من متجر Google Play في التلفزيون، نزّل برنامج <span class="g">Downloader</span> (من AFTVnews).</li>
+    <li>الإعدادات ← التطبيقات ← الوصول الخاص ← «تثبيت تطبيقات غير معروفة»، وفعّل Downloader.</li>
+    <li>افتح Downloader، واكتب رابط ملف <span class="ltr">.apk</span> من صفحة Releases في الريبو، ونزّله وثبّته.</li>
+    <li>افتح «أذان التلفاز»، واختر مدينتك، وفعّل «الظهور فوق التطبيقات» من قسم الأذونات.</li>
+    <li>اضغط «جرّب الأذان» من قسم اليوم، وتأكد إن كل شي تمام.</li>
+  </ol>
+  <h3>من الكمبيوتر</h3>
+  <p>فعّل وضع المطوّر و«تصحيح USB» في التلفزيون، وبعدها:</p>
+<pre>adb connect &lt;TV-IP&gt;:5555
+adb install -r adhan-tv.apk</pre>
+  <h3>تلفزيونات TCL</h3>
+  <p>نظام TCL يمنع البرامج تصحى لحالها، فلازم تسمح لها مرة وحدة من الكمبيوتر:</p>
+<pre>adb shell appops set app.adhantv APP_AUTO_START allow
+adb shell appops set app.adhantv APP_ASSOC_START allow
+adb shell appops set app.adhantv SYSTEM_ALERT_WINDOW allow</pre>
+  <p class="mute" style="font-size:10pt">بعدها تقدر تطفي وضع المطوّر، والبرنامج يكمّل يشتغل.</p>
+  <div class="foot"><span>أذان التلفاز</span><span>6</span></div>
+</section>
+
+<section class="page">
+  <h2>الطريق إلى متجر Google Play</h2>
+  <p>Google يطلب من حسابات المطوّرين الشخصية الجديدة اختبار مغلق قبل النشر: <span class="g">12 مختبر على الأقل، لمدة 14 يوم متواصلة</span>. بعدها تقدّم طلب النشر من لوحة Play Console.</p>
+  <ol class="steps">
+    <li>حساب مطوّر في Google Play Console (رسوم مرة وحدة).</li>
+    <li>مفتاح توقيع للبرنامج، يُحفظ عندك وما يدخل الريبو.</li>
+    <li>صفحة المتجر: الاسم، والوصف بالعربي والإنجليزي، وصور التلفزيون 1920×1080 (جاهزة في هذا الدليل)، والبانر.</li>
+    <li>سياسة خصوصية: البرنامج ما يجمع أي بيانات، وما فيه حسابات ولا إعلانات ولا سيرفر.</li>
+    <li>نموذج الأذونات: نشرح ليش نحتاج «الظهور فوق التطبيقات» و«المنبهات».</li>
+    <li>الاختبار المغلق: 12 شخص عندهم تلفزيون Android TV أو Google TV، يثبّتونه ويخلونه 14 يوم.</li>
+    <li>طلب النشر، ومراجعة Google لتطبيقات التلفزيون.</li>
+  </ol>
+  <h3>قبل النشر في المتجر</h3>
+  <table>
+    <tr><th>الشي</th><th>ليش</th></tr>
+    <tr><td>إذن مكتوب من هيئة الإذاعة والتلفزيون لاستخدام بث إذاعة القرآن</td><td>البث مفتوح تقنياً، بس الإذن الرسمي يحمي البرنامج من الحذف</td></tr>
+    <tr><td>شاشة في البرنامج تشرح أذونات TCL للمستخدم</td><td>المستخدم العادي ما عنده كمبيوتر ولا adb</td></tr>
+    <tr><td>جهاز ثاني غير TCL للتجربة</td><td>نتأكد إنه يشتغل على كل الأنواع</td></tr>
+  </table>
+  <h3>تبغى تكون من المختبرين؟</h3>
+  <p>افتح Issue في الريبو بعنوان «أبغى أجرّب»، ونضيفك للاختبار المغلق.</p>
+  <div class="foot"><span>أذان التلفاز</span><span>7</span></div>
+</section>
+
+<section class="page">
+  <h2>الريبو<small>مفتوح المصدر برخصة GPL-3.0: تستخدمه وتعدّله وتنشره، بشرط أي نسخة معدّلة تكون مفتوحة بنفس الرخصة</small></h2>
+  <table>
+    <tr><th>المجلد</th><th>وش فيه</th></tr>
+    <tr><td><span class="ltr">core/prayer</span></td><td>حساب الأوقات والإقامة والحدث الجاي. كوتلن صافي بدون أندرويد، ومعه اختبارات ضد أوقات أم القرى الرسمية.</td></tr>
+    <tr><td><span class="ltr">app</span></td><td>برنامج التلفزيون: الإعدادات، والمنبّه، وشاشة الأذان، والصوت.</td></tr>
+    <tr><td><span class="ltr">tools</span></td><td>سكربتات تبني البيانات من مصادرها الأصلية: المدن، والآيات، والأذان المسجّل، والأيقونات.</td></tr>
+    <tr><td><span class="ltr">licenses</span> و <span class="ltr">CREDITS.md</span></td><td>رخصة كل خط وكل مصدر.</td></tr>
+    <tr><td><span class="ltr">docs/research</span></td><td>البحث ورا كل قرار: الرخص، وسياسة المتجر، والأوقات، والصوت.</td></tr>
+    <tr><td><span class="ltr">.github</span></td><td>بناء واختبار تلقائي مع كل تعديل، ونماذج للمشاكل والأفكار.</td></tr>
+  </table>
+  <h3>البناء</h3>
+<pre>./gradlew :core:prayer:test assembleDebug lint
+adb install -r app/build/outputs/apk/debug/app-debug.apk</pre>
+  <h3>تجربة أذان حقيقي على التلفزيون (نسخة التطوير)</h3>
+<pre>adb shell am broadcast -a app.adhantv.TEST -n app.adhantv/.schedule.TestReceiver \
+  --ei delay 60 --ei seconds 30</pre>
+  <h3>الجاي</h3>
+  <div class="grid">
+    <div class="card"><b>آيات وأذكار</b>آية أو ذكر كل فترة في زاوية الشاشة، وأذكار الصباح والمساء، كلها من مصادرها.</div>
+    <div class="card"><b>الكهف يوم الجمعة</b>تذكير هادي الصبح.</div>
+    <div class="card"><b>ثيمات</b>أسود وذهبي، وزمردي، وكحلي.</div>
+    <div class="card"><b>المتجر</b>الاختبار المغلق، وبعدها النشر.</div>
+  </div>
+  <div class="foot"><span>أذان التلفاز</span><span>8</span></div>
+</section>
+
+</body>
+</html>
