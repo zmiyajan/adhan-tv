@@ -13,6 +13,7 @@ automatically by [release-please](https://github.com/googleapis/release-please) 
 * Colour themes (black and gold, emerald, navy, silver) for the whole app and the adhan screen.
 * Two welcome slides on first launch: what the app does, then city and permission.
 * Permissions page: every permission shows its state and can be turned on or off there.
+* «الأذان شغّال» switch at the top of «الأذان» replaces the pause page.
 * Simpler settings: «المدينة» holds the city, automatic location (asks for permission on first use) and the
   method; «الأذان» holds the sound and one row per prayer: with sound, silent, or off.
 * A recorded adhan stays on screen exactly as long as it plays; the radio follows the chosen minutes.

@@ -54,12 +54,12 @@ data class AppSettings(
     val textSize: TextSize = TextSize.MEDIUM,
     val showNext: Boolean = false,
     val onboarded: Boolean = false,
-    val pausedUntil: Instant? = null,
+    /** The master switch: off means no adhan or iqama screens at all until it is turned back on. */
+    val active: Boolean = true,
 ) {
     val schedule: ScheduleSettings
         get() = ScheduleSettings(method, enabled, iqamaEnabled, iqamaMinutes)
 
-    fun paused(now: Instant = Instant.now()): Boolean = pausedUntil?.isAfter(now) == true
 
     /** How long the adhan stays on screen: the recording's own length, or the chosen minutes for the radio. */
     fun adhanMs(prayer: Prayer, recordingMs: Long): Long =
@@ -120,7 +120,7 @@ class SettingsRepository(private val context: Context, private val cities: Citie
             textSize = p[K.textSize]?.let { enumOr(it, d.textSize) } ?: d.textSize,
             showNext = p[K.showNext] ?: d.showNext,
             onboarded = p[K.onboarded] ?: d.onboarded,
-            pausedUntil = p[K.pausedUntil]?.let(Instant::ofEpochMilli),
+            active = p[K.active] ?: d.active,
         )
     }
 
@@ -139,7 +139,8 @@ class SettingsRepository(private val context: Context, private val cities: Citie
         p[K.textSize] = s.textSize.name
         p[K.showNext] = s.showNext
         p[K.onboarded] = s.onboarded
-        s.pausedUntil?.let { p[K.pausedUntil] = it.toEpochMilli() } ?: p.remove(K.pausedUntil)
+        p[K.active] = s.active
+        p.remove(K.pausedUntil)   // older versions
     }
 
     private fun prayers(names: Set<String>) = names.mapNotNull { n -> Prayer.entries.firstOrNull { it.name == n } }.toSet()
@@ -167,6 +168,7 @@ class SettingsRepository(private val context: Context, private val cities: Citie
         val showNext = booleanPreferencesKey("show_next")
         val onboarded = booleanPreferencesKey("onboarded")
         val pausedUntil = longPreferencesKey("paused_until")
+        val active = booleanPreferencesKey("active")
         fun iqama(p: Prayer) = intPreferencesKey("iqama_${p.name}")
     }
 

@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
 
-/** Fires at an adhan or iqama: shows the screen if the TV is on and not paused, then arms the next event. */
+/** Fires at an adhan or iqama: shows the screen if the TV is on and the adhan is switched on, then arms the next event. */
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val event = event(intent)
@@ -29,7 +29,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 event?.let { delay(maxOf(0, it.at.toEpochMilli() - System.currentTimeMillis())) }   // woke early
                 // A late delivery (inexact alarm, TV just woke) is only worth showing within the first two minutes.
                 val show = event != null && screenOn && Duration.between(event.at, Instant.now()) < LATE &&
-                    !c.settings.current().paused()
+                    c.settings.current().active
                 Log.i(TAG, "show=$show at ${Instant.now()}")
                 if (show) {
                     context.startActivity(

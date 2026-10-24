@@ -63,8 +63,6 @@ import app.adhantv.ui.theme.Theme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.LocalTime
-import java.time.temporal.ChronoUnit
 
 private enum class Section(val title: String) {
     TODAY("اليوم"),
@@ -72,7 +70,6 @@ private enum class Section(val title: String) {
     ADHAN("الأذان"),
     IQAMA("الإقامة"),
     LOOK("الشكل"),
-    PAUSE("إيقاف مؤقت"),
     PERMISSIONS("الأذونات"),
     ABOUT("عن البرنامج"),
 }
@@ -172,7 +169,6 @@ fun HomeScreen(
                             Section.ADHAN -> item { Adhan(s, act) }
                             Section.IQAMA -> item { Iqama(s, act) }
                             Section.LOOK -> item { Look(s, act) }
-                            Section.PAUSE -> item { Pause(s, act) }
                             Section.PERMISSIONS -> item { PermissionsPane(resumes, act) }
                             Section.ABOUT -> item { About(version, act) }
                         }
@@ -237,7 +233,7 @@ private fun Today(s: AppSettings, scheduler: AlarmScheduler, hijri: Hijri, act: 
             }
         }
         when {
-            s.paused(now) -> Note("الأذان موقوف مؤقتاً لين ${s.pausedUntil!!.clockText(zone)}", Palette.live)
+            !s.active -> Note("الأذان متوقف. تقدر تشغّله من قسم الأذان.", Palette.live)
             next != null -> {
                 val what = if (next.kind == Event.Kind.IQAMA) "إقامة" else "أذان"
                 Note("القادم: $what ${next.prayer.arabic(next.jumuah)} ${next.at.clockText(zone)}", Palette.gold)
@@ -274,10 +270,12 @@ private fun Adhan(s: AppSettings, act: HomeActions) {
     }
     val current = if (s.useRadio) sounds.last() else sounds.firstOrNull { it.voiceId == s.voiceId } ?: sounds.first()
     Column {
+        ToggleRow("الأذان شغّال", s.active, if (s.active) "يطلع الأذان والإقامة في وقتها" else "متوقف: ما يطلع شي لين تشغّله", top = true) { on ->
+            act.change { it.copy(active = on) }
+        }
         ChoiceRow(
             "الصوت", current, sounds, { it.label },
             if (s.useRadio) "لو انقطع النت يشتغل أذان المسجد الحرام" else "يبقى الأذان على الشاشة طول مدة التسجيل",
-            top = true,
         ) { v ->
             act.change { if (v.voiceId == null) it.copy(source = SoundSource.RADIO) else it.copy(source = SoundSource.RECORDED, voiceId = v.voiceId) }
         }
@@ -324,21 +322,6 @@ private fun Look(s: AppSettings, act: HomeActions) {
         ChoiceRow("حجم الكلام", s.textSize, TextSize.entries, { it.label }, "حسب بُعد الكنبة عن التلفزيون") { v -> act.change { it.copy(textSize = v) } }
         ToggleRow("خط العدّ التنازلي", s.showBar, "خط يقصر لين تخلص الشاشة") { on -> act.change { it.copy(showBar = on) } }
         ToggleRow("سطر الصلاة القادمة", s.showNext, "تحت الآية في شاشة الأذان") { on -> act.change { it.copy(showNext = on) } }
-    }
-}
-
-@Composable
-private fun Pause(s: AppSettings, act: HomeActions) {
-    val zone = s.city.place.zone
-    Column {
-        Note(if (s.paused()) "موقوف لين ${s.pausedUntil!!.clockText(zone)}" else "الأذان شغّال", if (s.paused()) Palette.live else Palette.mute)
-        ActionRow("أوقفه ساعة", top = true) { act.change { it.copy(pausedUntil = Instant.now().plus(1, ChronoUnit.HOURS)) } }
-        ActionRow("أوقفه ساعتين") { act.change { it.copy(pausedUntil = Instant.now().plus(2, ChronoUnit.HOURS)) } }
-        ActionRow("أوقفه لين بكرة", "يرجع يشتغل الساعة 12 بالليل") {
-            val midnight = Instant.now().atZone(zone).toLocalDate().plusDays(1).atTime(LocalTime.MIDNIGHT).atZone(zone).toInstant()
-            act.change { it.copy(pausedUntil = midnight) }
-        }
-        if (s.paused()) ActionRow("رجّعه الحين") { act.change { it.copy(pausedUntil = null) } }
     }
 }
 
