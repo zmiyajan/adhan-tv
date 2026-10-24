@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>أذان التلفاز</title>
+<style>
+@font-face{font-family:Amiri;src:url(../../app/src/main/res/font/amiri_bold.ttf)}
+@font-face{font-family:Plex;src:url(../../app/src/main/res/font/plex_arabic.ttf)}
+@font-face{font-family:Hafs;src:url(../../app/src/main/res/font/kfgqpc_hafs_v30.ttf)}
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+:root{--gold:#bba27a;--ink:#ece7de;--mute:#a8a39b;--bg:#0b0b0c;--card:#17171a;--line:#2a2a2e}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:13pt/1.8 Plex,"Geeza Pro",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:210mm;height:297mm;overflow:hidden;padding:22mm 20mm;page-break-after:always;position:relative;background:radial-gradient(ellipse 90% 60% at 50% 30%,#18171a,#0b0b0c 70%)}
+.page:last-child{page-break-after:auto}
+h1,h2,h3{font-family:Amiri;font-weight:700;color:var(--gold);margin:0}
+h1{font-size:50pt;line-height:1.2}
+h2{font-size:28pt;margin-bottom:3mm}
+.lead{font-size:13.5pt;color:var(--mute);margin:0 0 8mm}
+h3{font-size:16pt;color:var(--ink);margin:0 0 1mm}
+p{margin:0 0 3mm}
+.g{color:var(--gold)}
+.rule{width:40mm;height:.6mm;background:var(--gold);opacity:.6;margin:6mm 0}
+.cover{display:flex;flex-direction:column;justify-content:center;text-align:center;align-items:center}
+.verse{font-family:Hafs;font-size:22pt;color:var(--gold);margin:8mm 0 2mm}
+.shot{width:100%;border-radius:3mm;border:.3mm solid var(--line);display:block}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+.card{background:var(--card);border:.3mm solid var(--line);border-radius:4mm;padding:5mm 6mm}
+.card .ic{font-size:22pt;line-height:1;margin-bottom:2mm}
+.card h3{color:var(--gold);font-size:15pt}
+.card p{font-size:11.5pt;color:#d6d0c6;margin:0}
+.big{display:flex;gap:6mm;align-items:flex-start;margin-bottom:6mm}
+.big .n{flex:none;width:12mm;height:12mm;border-radius:50%;background:var(--gold);color:#111;display:grid;place-items:center;font-size:15pt}
+.big p{margin:0;color:#d6d0c6;font-size:12pt}
+.qa{margin-bottom:5mm}
+.qa b{display:block;color:var(--gold);font-weight:400;font-size:13.5pt}
+.qa span{color:#d6d0c6;font-size:12pt}
+.foot{position:absolute;bottom:11mm;left:20mm;right:20mm;display:flex;justify-content:space-between;font-size:9pt;color:#6d6963}
+.badge{display:inline-block;border:.3mm solid var(--gold);color:var(--gold);border-radius:6mm;padding:1mm 5mm;font-size:11pt}
+.chips{display:flex;flex-wrap:wrap;gap:3mm;justify-content:center;margin-top:8mm}
+.chips span{border:.3mm solid var(--line);background:var(--card);border-radius:6mm;padding:1mm 5mm;font-size:11pt;color:#d6d0c6}
+</style>
+</head>
+<body>
+
+<section class="page cover">
+  <span class="badge">قريباً على Google Play</span>
+  <h1 style="margin-top:10mm">أذان التلفاز</h1>
+  <div class="rule"></div>
+  <p style="font-size:16pt;max-width:150mm">التلفزيون يذكّرك بالصلاة.<br>وقت الأذان يوقف اللي شغّال، ويرفع الأذان على الشاشة.</p>
+  <div class="verse">﴿{{4:103:14}}﴾</div>
+  <p style="font-size:11pt;color:var(--mute)">النساء · 103</p>
+  <img class="shot" style="margin-top:10mm" src="../screenshots/9-adhan-screen.png" alt="">
+  <div class="chips"><span>مجاني</span><span>بدون إعلانات</span><span>بدون تسجيل</span><span>لتلفزيونات أندرويد وجوجل</span></div>
+</section>
+
+<section class="page">
+  <h2>لمين البرنامج؟</h2>
+  <p class="lead">لكل بيت فيه تلفزيون شغّال، والصلاة ممكن تفوت والناس مندمجين.</p>
+  <div class="who">
+    <div class="card"><div class="ic">👨‍👩‍👧‍👦</div><h3>الأب والأم</h3><p>عيالك قدام الكرتون أو الألعاب أو يوتيوب؟ وقت الأذان تطلع الشاشة لهم، ويوقف اللي يتفرجون عليه. تذكير هادي بدون صراخ، ويتعلّمون إن الصلاة أهم من أي شي.</p></div>
+    <div class="card"><div class="ic">👴</div><h3>كبار السن</h3><p>اللي ما يسمع أذان المسجد، أو ما يقدر يتابع الساعة. الأذان يجيه على الشاشة اللي قدامه، بخط كبير وواضح، وبصوت.</p></div>
+    <div class="card"><div class="ic">⚽</div><h3>وقت المباريات والمسلسلات</h3><p>أكثر وقت تفوت فيه الصلاة. البرنامج يوقف المقطع، ويذكّرك، وأنت تكمّل بعد الصلاة من نفس المكان.</p></div>
+    <div class="card"><div class="ic">🏢</div><h3>اللي بيته بعيد عن المسجد</h3><p>شقق ومجمّعات ما يوصلها صوت الأذان، أو بيوت في مدن ودول ما فيها أذان أصلاً. التلفزيون يصير هو المؤذن.</p></div>
+    <div class="card"><div class="ic">🛋️</div><h3>المجالس والاستراحات</h3><p>تلفزيون شغّال طول السهرة؟ الكل يشوف الأذان في وقته، والإقامة بعده، وما أحد يتأخر.</p></div>
+    <div class="card"><div class="ic">🕌</div><h3>اللي يبغى يلحق الجماعة</h3><p>بعد الأذان بوقت، تطلع شاشة «حان الآن موعد إقامة الصلاة»، عشان تعرف إن الإمام بيكبّر.</p></div>
+  </div>
+  <div class="foot"><span>أذان التلفاز</span><span>2</span></div>
+</section>
+
+<section class="page">
+  <h2>وش يصير وقت الأذان؟</h2>
+  <p class="lead">ما تسوي شي. كل شي يصير لحاله.</p>
+  <div class="big"><div class="n">1</div><p><b class="g">يوقف اللي شغّال.</b> المسلسل أو المباراة أو يوتيوب يوقف مكانه.</p></div>
+  <div class="big"><div class="n">2</div><p><b class="g">يطلع الأذان على الشاشة كاملة،</b> باسم الصلاة وآية عن الصلاة بخط المصحف، وصوت الأذان.</p></div>
+  <div class="big"><div class="n">3</div><p><b class="g">بعد ما يخلص،</b> ترجع للي كنت تتفرج عليه، وهو واقف لين تضغط تشغيل. ما يفوتك شي.</p></div>
+  <img class="shot" src="../screenshots/9-adhan-screen.png" alt="" style="margin:4mm 0 6mm">
+  <div class="who">
+    <div class="card"><h3>الأوقات صحيحة</h3><p>نفس تقويم أم القرى الرسمي، وتقدر تختار مدينتك من أي مكان في العالم.</p></div>
+    <div class="card"><h3>الصوت</h3><p>إذاعة القرآن الكريم مباشر في مكة والرياض، وأذان من الحرم في باقي المدن.</p></div>
+  </div>
+  <div class="foot"><span>أذان التلفاز</span><span>3</span></div>
+</section>
+
+<section class="page">
+  <h2>أنت تتحكم</h2>
+  <p class="lead">كل شي بالريموت، من قائمة واضحة بالعربي.</p>
+  <img class="shot" src="../screenshots/1-today.png" alt="" style="margin-bottom:7mm">
+  <div class="who">
+    <div class="card"><h3>اختر الصلوات</h3><p>مثلاً تطفي أذان الفجر لأن الكل نايم، وتخلي الباقي.</p></div>
+    <div class="card"><h3>إيقاف مؤقت</h3><p>عندك ضيوف أو اجتماع؟ أوقفه ساعة أو ساعتين أو لين بكرة.</p></div>
+    <div class="card"><h3>وقت الإقامة</h3><p>عدّل الدقايق حسب مسجد حيّكم.</p></div>
+    <div class="card"><h3>الشكل</h3><p>كبّر الخط لو الكنبة بعيدة، وغيّر اللون.</p></div>
+  </div>
+  <div class="foot"><span>أذان التلفاز</span><span>4</span></div>
+</section>
+
+<section class="page">
+  <h2>أسئلة يسألها الناس</h2>
+  <div style="height:4mm"></div>
+  <div class="qa"><b>لو التلفزيون مطفي، بيشتغل لحاله؟</b><span>لا. يشتغل بس لما يكون التلفزيون شغّال.</span></div>
+  <div class="qa"><b>فيه إعلانات أو اشتراك؟</b><span>لا، أبداً. مجاني بالكامل، وبيبقى مجاني.</span></div>
+  <div class="qa"><b>يحتاج أسجّل أو أعطي بياناتي؟</b><span>لا. ما فيه تسجيل، وما يرسل أي معلومة عنك لأي مكان.</span></div>
+  <div class="qa"><b>يحتاج إنترنت؟</b><span>الأوقات بدون إنترنت. الإنترنت بس لصوت الإذاعة، ولو انقطع يشغّل الأذان المسجّل.</span></div>
+  <div class="qa"><b>يثقّل التلفزيون؟</b><span>لا. ما يشتغل إلا وقت الأذان، وباقي الوقت نايم.</span></div>
+  <div class="qa"><b>أبغى أقفل الأذان بسرعة؟</b><span>اضغط زر الرجوع في الريموت.</span></div>
+  <div class="qa"><b>أقدر أجرّبه قبل وقت الصلاة؟</b><span>نعم، فيه زر «جرّب الأذان».</span></div>
+  <div class="qa"><b>يشتغل على تلفزيوني؟</b><span>على أي تلفزيون فيه Android TV أو Google TV، مثل TCL وسوني وشاومي وهايسنس، وأجهزة Chromecast.</span></div>
+  <div class="qa"><b>مين سوّاه؟ وأقدر أعدّل عليه؟</b><span>انبنى بمساعدة أداة Claude Code، وكوده مفتوح للجميع. أي أحد يقدر يعدّل عليه ويضيف أفكاره.</span></div>
+  <div class="qa"><b>المحتوى من وين؟</b><span>الآيات وخط المصحف من مجمع الملك فهد لطباعة المصحف الشريف، والأوقات على تقويم أم القرى.</span></div>
+  <div class="foot"><span>أذان التلفاز</span><span>5</span></div>
+</section>
+
+<section class="page cover">
+  <h2>قريباً على Google Play</h2>
+  <div class="rule"></div>
+  <p style="font-size:15pt;max-width:150mm">قبل ما ينزل في المتجر، نحتاج ناس يجرّبونه أسبوعين في بيوتهم.</p>
+  <p style="font-size:13pt;color:var(--mute);max-width:150mm">عندك تلفزيون أندرويد أو جوجل، وتبغى تكون من أول الناس؟ تواصل معنا، ونرسل لك طريقة التنزيل.</p>
+  <div class="verse" style="font-size:18pt;margin-top:16mm">﴿{{2:43:1-2}}﴾</div>
+  <p style="font-size:10pt;color:var(--mute)">البقرة · 43</p>
+  <div class="chips" style="margin-top:16mm"><span>مجاني</span><span>بدون إعلانات</span><span>بدون تسجيل</span><span>مفتوح المصدر</span></div>
+</section>
+
+</body>
+</html>

@@ -1,9 +1,11 @@
 package app.adhantv.audio
 
 import android.content.Context
-import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.MediaPlayer
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.datasource.RawResourceDataSource
+import androidx.media3.exoplayer.ExoPlayer
 import app.adhantv.R
 
 /**
@@ -12,7 +14,7 @@ import app.adhantv.R
  */
 class AdhanSound(private val context: Context, radio: Boolean, private val onLive: (Boolean) -> Unit) {
     private var live: LiveRadio? = null
-    private var recorded: MediaPlayer? = null
+    private var recorded: ExoPlayer? = null
     private val fallback = Runnable { if (live?.playing != true) playRecording() }
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
@@ -30,11 +32,17 @@ class AdhanSound(private val context: Context, radio: Boolean, private val onLiv
         live?.release()
         live = null
         onLive(false)
-        recorded = MediaPlayer.create(
-            context, R.raw.adhan_haram,
-            AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build(),
-            context.getSystemService(AudioManager::class.java).generateAudioSessionId(),   // 0 is the output mix, not a session
-        )?.apply { start() }
+        // ExoPlayer decodes to PCM itself. MediaPlayer hands long AAC files to the TV's "offload" output, which on
+        // some TVs (TCL with HDMI audio) plays nothing at all.
+        recorded = ExoPlayer.Builder(context).build().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_SPEECH).build(),
+                false,   // the adhan screen already took audio focus
+            )
+            setMediaItem(MediaItem.fromUri(RawResourceDataSource.buildRawResourceUri(R.raw.adhan_haram)))
+            prepare()
+            play()
+        }
     }
 
     fun release() {

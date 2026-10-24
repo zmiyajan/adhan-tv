@@ -53,7 +53,7 @@ pre{direction:ltr;text-align:left;background:#141417;border:.3mm solid var(--lin
   <h1 style="margin-top:10mm">أذان التلفاز</h1>
   <div class="rule"></div>
   <p style="font-size:14pt;max-width:140mm">الأذان والإقامة على شاشة التلفزيون في وقتها بالضبط، فوق أي شي شغّال، بصوت إذاعة القرآن الكريم أو أذان الحرم.</p>
-  <div class="verse">﴿إِنَّ ٱلصَّلَوٰةَ كَانَتۡ عَلَى ٱلۡمُؤۡمِنِينَ كِتَٰبࣰا مَّوۡقُوتࣰا﴾</div>
+  <div class="verse">﴿{{4:103:14}}﴾</div>
   <p class="mute" style="font-size:10pt">النساء · 103</p>
   <img class="shot" style="margin-top:12mm" src="../screenshots/9-adhan-screen.png" alt="">
   <p class="mute" style="margin-top:10mm;font-size:10pt">مجاني · مفتوح المصدر · بدون إعلانات · لتلفزيونات Android TV و Google TV</p>
@@ -193,6 +193,7 @@ adb shell appops set app.adhantv SYSTEM_ALERT_WINDOW allow</pre>
     <tr><td><span class="ltr">docs/research</span></td><td>البحث ورا كل قرار: الرخص، وسياسة المتجر، والأوقات، والصوت.</td></tr>
     <tr><td><span class="ltr">.github</span></td><td>بناء واختبار تلقائي مع كل تعديل، ونماذج للمشاكل والأفكار.</td></tr>
   </table>
+  <p class="mute" style="font-size:10.5pt">انبنى بمساعدة Claude Code من Anthropic. الكود مرتّب وموثّق، فتقدر تعدّل عليه بنفسك أو تطلب التعديل من Claude Code بالعربي.</p>
   <h3>البناء</h3>
 <pre>./gradlew :core:prayer:test assembleDebug lint
 adb install -r app/build/outputs/apk/debug/app-debug.apk</pre>
