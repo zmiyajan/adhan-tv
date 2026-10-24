@@ -85,7 +85,6 @@ class HomeActions(
     val tryEvent: (Event.Kind) -> Unit,
     val board: () -> Unit,
     val radio: () -> Unit,
-    val haramChannel: () -> Unit,
     val overApps: () -> Unit,
     val exact: () -> Unit,
     val locationSettings: () -> Unit,
@@ -270,21 +269,27 @@ private fun CityAndPrayers(s: AppSettings, resumes: Int, act: HomeActions, onCho
     }
 }
 
+/** One sound choice: a recording, or the live radio. */
+private data class Sound(val label: String, val voiceId: String?)
+
 @Composable
 private fun Adhan(s: AppSettings, act: HomeActions) {
+    val context = LocalContext.current
+    val sounds = remember(s.voiceId, s.source) {
+        AdhanVoice.available(context).map { Sound(it.label, it.id) } + Sound("إذاعة القرآن الكريم مباشر", null)
+    }
+    val current = if (s.useRadio) sounds.last() else sounds.firstOrNull { it.voiceId == s.voiceId } ?: sounds.first()
     Column {
         ChoiceRow(
-            "الصوت", s.source, SoundSource.entries, { it.label },
-            "الحين: ${if (s.useRadio) "إذاعة القرآن الكريم مباشر" else "أذان مسجّل"}. ولو انقطع النت يشتغل المسجّل",
+            "الصوت", current, sounds, { it.label },
+            if (s.useRadio) "لو انقطع النت يشتغل أذان المسجد الحرام" else "يبقى الأذان على الشاشة طول مدة التسجيل",
             top = true,
-        ) { v -> act.change { it.copy(source = v) } }
-        val context = LocalContext.current
-        val voices = remember(s.voiceId) { AdhanVoice.available(context) }
-        ChoiceRow("الأذان المسجّل", AdhanVoice.of(context, s.voiceId), voices, { it.label }, "يبقى على الشاشة طول مدة التسجيل") { v ->
-            act.change { it.copy(voiceId = v.id) }
+        ) { v ->
+            act.change { if (v.voiceId == null) it.copy(source = SoundSource.RADIO) else it.copy(source = SoundSource.RECORDED, voiceId = v.voiceId) }
         }
-        ChoiceRow("مدة الأذان مع الإذاعة", s.adhanMinutes, listOf(1, 2, 3, 4, 5), { minutes(it) }) { v -> act.change { it.copy(adhanMinutes = v) } }
-        ActionRow("أذانات المسجد الحرام", "قناة شبكة الشيخ فاروق حضراوي، تفتح في يوتيوب", onClick = act.haramChannel)
+        if (s.useRadio) {
+            ChoiceRow("مدة الأذان مع الإذاعة", s.adhanMinutes, listOf(1, 2, 3, 4, 5), { minutes(it) }) { v -> act.change { it.copy(adhanMinutes = v) } }
+        }
         Spacer(Modifier.height(10.dp))
         Prayer.entries.forEach { p ->
             ToggleRow("صوت أذان ${p.arabic()}", p in s.sound) { on -> act.change { it.copy(sound = if (on) it.sound + p else it.sound - p) } }

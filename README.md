@@ -48,12 +48,12 @@ Google يطلب من الحسابات الجديدة **12 مختبر على ال
 
 ### أذانك الخاص
 
-تقدر تحط أي أذان تحبه (لاستخدامك الشخصي) في التلفزيون، ويظهر في الإعدادات باسم «أذانك الخاص»:
+تقدر تحط أي أذان تحبه (لاستخدامك الشخصي) في التلفزيون، وكل ملف يظهر في الإعدادات باسمه:
 
 <div dir="ltr">
 
 ```sh
-adb push adhan.mp3 /sdcard/Android/data/app.adhantv/files/adhan.mp3
+adb push "المكي.mp3" /sdcard/Android/data/app.adhantv/files/
 ```
 
 </div>

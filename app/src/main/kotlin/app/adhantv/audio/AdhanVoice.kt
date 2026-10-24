@@ -9,7 +9,7 @@ import java.io.File
 
 /**
  * An adhan recording the user can choose: the bundled one (sources and licences in CREDITS.md), or the user's own
- * files put on the TV in Android/data/app.adhantv/files/adhan/ — each file is one choice, named after the file
+ * audio files put on the TV in Android/data/app.adhantv/files/ — each file is one choice, named after the file
  * (e.g. «المدني.webm» shows as «المدني»). The user's files never ship with the app.
  * A recorded adhan stays on screen exactly as long as it plays.
  */
@@ -37,13 +37,23 @@ data class AdhanVoice(val id: String, val label: String) {
         val HARAM = AdhanVoice("HARAM", "المسجد الحرام")
         private const val HARAM_MS = 181_500L
 
-        fun ownDir(context: Context) = File(context.getExternalFilesDir(null), "adhan")
+        /** The app's own folder (created by the app, so it can list files that adb pushes into it). */
+        fun ownDir(context: Context): File? = context.getExternalFilesDir(null)
 
-        /** The bundled adhan, then the user's own files in name order. */
-        fun available(context: Context): List<AdhanVoice> = listOf(HARAM) +
-            (ownDir(context).listFiles { f -> f.isFile }?.sortedBy { it.name }?.map { AdhanVoice(it.name, it.nameWithoutExtension) } ?: emptyList())
+        private val AUDIO = setOf("mp3", "m4a", "aac", "ogg", "oga", "opus", "webm", "wav", "flac")
 
-        /** A saved choice; falls back to the bundled adhan if the file is gone. */
-        fun of(context: Context, id: String?): AdhanVoice = available(context).firstOrNull { it.id == id } ?: HARAM
+        /**
+         * The user's own files when there are any (the bundled recording then stays only as the offline fallback),
+         * otherwise the bundled one. A file named «المسجد الحرام…» comes first and is the default.
+         */
+        fun available(context: Context): List<AdhanVoice> {
+            val own = ownDir(context)?.listFiles { f -> f.isFile && f.extension.lowercase() in AUDIO }
+                ?.sortedWith(compareBy({ !it.name.startsWith(HARAM.label) }, { it.name }))
+                ?.map { AdhanVoice(it.name, it.nameWithoutExtension) }
+            return own?.takeIf { it.isNotEmpty() } ?: listOf(HARAM)
+        }
+
+        /** A saved choice; falls back to the first available adhan if the file is gone. */
+        fun of(context: Context, id: String?): AdhanVoice = available(context).let { list -> list.firstOrNull { it.id == id } ?: list.first() }
     }
 }

@@ -55,9 +55,6 @@ class Credit(
     val file: String? = null,
 )
 
-/** Recordings of the Grand Mosque's muezzins (linked only; nothing of theirs is bundled). */
-const val HARAM_CHANNEL = "https://www.youtube.com/@Haramainrec"
-
 /** Where the project lives. */
 const val REPO = "https://github.com/zmiyajan/adhan-tv"
 
@@ -99,12 +96,6 @@ val CREDITS = listOf(
             "التسجيل" to "https://commons.wikimedia.org/wiki/File:Maghrib_Adhan_at_the_Masjid_al_Haram,_Mecca_-_25_Feb,_2012.webm",
             "الرخصة" to "https://creativecommons.org/licenses/by/3.0/",
         ),
-    ),
-    Credit(
-        "أذانات المسجد الحرام", "شبكة الشيخ فاروق حضراوي مؤذن المسجد الحرام",
-        "تسجيلات أذان مؤذني المسجد الحرام، تنشرها شبكة الشيخ فاروق حضراوي على يوتيوب. تقدر تفتح القناة من قسم الأذان " +
-            "وتسمعها في تطبيق يوتيوب.",
-        listOf("القناة" to HARAM_CHANNEL),
     ),
     Credit(
         "إذاعة القرآن الكريم", "هيئة الإذاعة والتلفزيون",

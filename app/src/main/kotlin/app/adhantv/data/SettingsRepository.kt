@@ -32,13 +32,8 @@ enum class TextSize(val scale: Float, val label: String) {
     LARGE(1.15f, "كبير"),
 }
 
-/** Where the adhan sound comes from. */
-enum class SoundSource(val label: String) {
-    /** Quran Radio in Makkah and Riyadh (it carries their adhan), the recording everywhere else. */
-    AUTO("تلقائي حسب المدينة"),
-    RADIO("إذاعة القرآن الكريم"),
-    RECORDED("أذان مسجّل"),
-}
+/** Where the adhan sound comes from: a recording (the default) or the live Quran Radio. */
+enum class SoundSource { RECORDED, RADIO }
 
 /** Everything the user can change. [cityConfirmed] is false while the city is only a guess from the time zone. */
 data class AppSettings(
@@ -48,7 +43,7 @@ data class AppSettings(
     val enabled: Set<Prayer> = Prayer.entries.toSet(),
     val sound: Set<Prayer> = Prayer.entries.toSet(),
     val adhanMinutes: Int = 4,
-    val source: SoundSource = SoundSource.AUTO,
+    val source: SoundSource = SoundSource.RECORDED,
     /** Id of the chosen recording (see [AdhanVoice]); resolved against the files on the TV when it plays. */
     val voiceId: String = AdhanVoice.HARAM.id,
     val iqamaEnabled: Boolean = true,
@@ -70,18 +65,9 @@ data class AppSettings(
     fun adhanMs(prayer: Prayer, recordingMs: Long): Long =
         if (prayer in sound && !useRadio) recordingMs + 1_500 else adhanMinutes * 60_000L
 
-    /** True when the adhan should play the live radio rather than the recording. */
-    val useRadio: Boolean
-        get() = when (source) {
-            SoundSource.RADIO -> true
-            SoundSource.RECORDED -> false
-            SoundSource.AUTO -> city.near(MAKKAH, 40.0) || city.near(RIYADH, 50.0)
-        }
+    /** True when the adhan plays the live radio rather than a recording. */
+    val useRadio: Boolean get() = source == SoundSource.RADIO
 
-    private companion object {
-        val MAKKAH = 21.4225 to 39.8262
-        val RIYADH = 24.7136 to 46.6753
-    }
 }
 
 class SettingsRepository(private val context: Context, private val cities: Cities) {
