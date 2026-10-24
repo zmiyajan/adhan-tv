@@ -161,7 +161,19 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         item { Spacer(Modifier.height(30.dp)) }
-                        item { Text(section.title, style = TextStyle(fontFamily = Fonts.amiri, fontSize = 30.sp, color = Palette.ink)) }
+                        item {
+                            // Title on the right; on «اليوم» the city and Hijri date sit quietly on the left of the same line.
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text(section.title, style = TextStyle(fontFamily = Fonts.amiri, fontSize = 30.sp, color = Palette.ink))
+                                if (section == Section.TODAY) {
+                                    val h = remember(s.city) { hijri.of(java.time.LocalDate.now(s.city.place.zone)) }
+                                    Text(
+                                        "${s.city.name} · ${h.day} ${Hijri.MONTHS[h.month - 1]} ${h.year}",
+                                        style = TextStyle(fontFamily = Fonts.plex, fontSize = 15.sp, color = Palette.mute),
+                                    )
+                                }
+                            }
+                        }
                         item { Spacer(Modifier.height(8.dp)) }
                         when (section) {
                             Section.TODAY -> item { Today(s, scheduler, hijri, act) }
@@ -201,10 +213,8 @@ private fun Today(s: AppSettings, scheduler: AlarmScheduler, hijri: Hijri, act: 
     val day = remember(s, date) { schedule.day(date) }
     val events = remember(s, date) { schedule.events(date) }
     val next = remember(s, now) { schedule.next(now) }
-    val h = hijri.of(date)
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Note("${s.city.name} · ${h.day} ${Hijri.MONTHS[h.month - 1]} ${h.year}")
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Prayer.entries.forEach { p ->
                 val friday = events.firstOrNull { it.prayer == p }?.jumuah == true
