@@ -18,7 +18,7 @@ automatically by [release-please](https://github.com/googleapis/release-please) 
   suggestions QR code; restart and reset-to-defaults.
 * Narrower menu with the version at its foot; pressing a section returns to its top; Back goes to the menu.
 * Licence changed to MIT.
-* «أذانك الخاص»: play your own adhan file from the TV (Android/data/app.adhantv/files/adhan.mp3).
+* «أذانك الخاص»: play your own adhan file from the TV (Android/data/app.adhantv/files/adhan.mp3, .m4a, .webm or .ogg).
 
 ### Fixes
 
