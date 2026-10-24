@@ -43,7 +43,7 @@ Licence filter used: CC0, credible public domain, CC BY, and CC BY-SA (for the a
   - GitHub: open-source adhan apps.
   - Official sites: alharamain.gov.sa, moia.gov.sa, awqaf.gov.jo, pal-wakf.ps, awqaf.gov.eg, azhar.eg, alaqsa.ps.
 - **Downloads:** everything went to `/private/tmp/claude-501/-Users-zmiyajan-Desktop-home-assistant/a991e66b-387d-41c4-8c8c-44a4d3c17ed6/scratchpad/adhan-candidates/` (`commons/`, `freesound/`). Nothing from that folder was executed.
-- **Measurement** [V]: `python3 -I`, stdlib only, with `afconvert` decoding to 44.1 kHz mono 16-bit. The scripts are in the sibling `tools/` folder: `measure.py`, `phrases.py`, `envelope.py`, `fine.py`. Metrics:
+- **Measurement** [V]: `python3 -I`, stdlib only, with `afconvert` decoding to 44.1 kHz mono 16-bit. Scripts: `/private/tmp/claude-501/-Users-zmiyajan-Desktop-home-assistant/a991e66b-387d-41c4-8c8c-44a4d3c17ed6/scratchpad/tools/measure.py`, `/private/tmp/claude-501/-Users-zmiyajan-Desktop-home-assistant/a991e66b-387d-41c4-8c8c-44a4d3c17ed6/scratchpad/tools/phrases.py`, `/private/tmp/claude-501/-Users-zmiyajan-Desktop-home-assistant/a991e66b-387d-41c4-8c8c-44a4d3c17ed6/scratchpad/tools/envelope.py`, `/private/tmp/claude-501/-Users-zmiyajan-Desktop-home-assistant/a991e66b-387d-41c4-8c8c-44a4d3c17ed6/scratchpad/tools/fine.py`. Metrics:
   - `peak` / `RMS`: dBFS.
   - `loud`: 95th percentile of 50 ms frame levels (the voice level).
   - `floor`: 10th percentile (the level between phrases).
@@ -52,7 +52,7 @@ Licence filter used: CC0, credible public domain, CC BY, and CC BY-SA (for the a
   - `clip`: samples at or above |32700|.
   - `tail`: the level of the last 1 s relative to `loud`. Above about −8 dB means the file probably ends mid-phrase.
   - `bw`: the highest frequency within 60 dB of the spectral peak (Hann-windowed FFT over the loudest 30% of 2048-sample blocks). A low value means a band-limited or muffled source.
-  - `phrases`: breath groups separated by gaps of at least 0.7 s. A Sunni adhan has 12 phrases in this style of delivery, and Fajr has 14.
+  - `phrases`: breath groups separated by gaps of at least 0.7 s. Heuristic [U]: if each pair of takbirs is sung in one breath, a Sunni adhan has about 12 phrases and Fajr about 14. Muezzins vary, so a matching count is *consistent with* a complete adhan, not proof of one.
 - **Caveats:**
   - Commons videos were measured on Commons' **360p MP4 transcode** (MP3 128 kbps stereo 48 kHz), because `afconvert` cannot open WebM.
   - Freesound files were measured on the public **HQ previews** (MP3 ~130–190 kbps). The originals need a login.
@@ -167,7 +167,7 @@ An F-Droid listing does not mean the app's media assets were licence-cleared. F-
 
 - **No clean, complete, licensed recording exists** [V for everything searched].
 - Choose between:
-  - **(a)** the 2013 Seyfula Islam file, about 3.3× the SNR of the current file (29.2 vs 8.8 dB) but missing the final phrase. It could be "repaired" by fading out after the last takbir; the result would be an incomplete adhan, which is liturgically unacceptable [U, a judgement].
+  - **(a)** the 2013 Seyfula Islam file, about **+20 dB** better SNR than the current file (29.2 vs 8.8 dB) but missing the final phrase. It could be "repaired" by fading out after the last takbir; the result would be an incomplete adhan, which is liturgically unacceptable [U, a judgement].
   - **(b)** the current 2012 file, complete but muffled (SNR 8.8 dB).
 - **Recommendation:** keep (b) as the bundled default for now. Rebuild it from the original WebM rather than the 360p transcode, and apply a gentle expander or noise gate between phrases. Ask the user to compare by ear. Pursue §7 for a real fix.
 - Makki Fajr: **none found.**
@@ -277,7 +277,7 @@ Addressees found: the Haramain authority (alharamain.gov.sa, «اتصل بنا»
 - The reason the ejaz215 original was deleted from Freesound is unknown [U].
 - The Egyptian Awqaf and alaqsa.ps sites were unreachable, so their terms were not checked [U].
 - Whether a muezzin holds a separate performer's right in a visitor's PA recording of a public adhan is untested, as noted in 05 §2.1 [U]. This applies to every Haramain file above, including the recommended المدني file.
-- Commons and Wikipedia search can miss files with unusual titles. Two Commons category queries (`Videos of Mecca/Medina/Jerusalem/Cairo`) were rate-limited and returned nothing. They were partly covered by the full-text searches [V for what ran].
+- Commons and Wikipedia search can miss files with unusual titles. Seven Commons category queries were rate-limited and returned nothing: `Videos of mosques`, `Videos of Mecca`, `Videos of Medina`, `Videos of Jerusalem`, `Videos of Cairo`, `Adhan in Egypt`, `Videos of mosques in Egypt`. They were partly covered by the full-text searches [V for what ran].
 
 ## Sources
 

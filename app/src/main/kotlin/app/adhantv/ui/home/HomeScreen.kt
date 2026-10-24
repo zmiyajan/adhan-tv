@@ -146,7 +146,7 @@ fun HomeScreen(
                             )
                         }
                         Spacer(Modifier.weight(1f))
-                        // RTL: «صُنع في مكة» on the right, the version number on the left.
+                        // RTL: «صُنع في مكة» on the right, a divider, the version number on the left.
                         Row(
                             Modifier.fillMaxWidth().padding(horizontal = 12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -157,6 +157,7 @@ fun HomeScreen(
                                 Spacer(Modifier.width(5.dp))
                                 KaabaIcon(13.dp)
                             }
+                            Text("|", style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
                             Text(version, style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
                         }
                     }
