@@ -92,7 +92,7 @@ adb shell appops set app.adhantv SYSTEM_ALERT_WINDOW allow
 
 ## كيف انبنى
 
-انبنى البرنامج بمساعدة [Claude Code](https://claude.com/claude-code) من Anthropic. الكود مرتّب وموثّق، وكل قرار مشروح في `docs/research`، فتقدر تعدّل عليه بنفسك أو بمساعدة Claude Code: افتح الريبو واطلب التعديل اللي تبغاه بالعربي.
+انبنى البرنامج بمساعدة [Claude Code](https://claude.com/claude-code) من Anthropic. الكود مرتّب وموثّق، فتقدر تعدّل عليه بنفسك أو بمساعدة Claude Code: افتح الريبو واطلب التعديل اللي تبغاه بالعربي.
 
 ## صدقة جارية
 
@@ -129,11 +129,10 @@ Requirements: JDK 17+ to run Gradle (a Java 21 toolchain is downloaded automatic
 | `app` | Android TV app (Compose for TV): settings, alarms, adhan screen, audio. |
 | `app/src/debug` | Debug-only test trigger: `adb shell am broadcast -a app.adhantv.TEST -n app.adhantv/.schedule.TestReceiver --ei delay 60 --ei seconds 30` |
 | `tools` | Scripts that build the bundled data (cities, verses, adhan audio, icons) from their original sources. |
-| `docs/research` | Research notes behind each decision (licensing, Play policy, prayer times, architecture, audio). |
 
 ### How it was built
 
-Built with the help of [Claude Code](https://claude.com/claude-code). The code is small, documented, and every decision is explained in `docs/research`, so it is easy to change — by hand or by asking Claude Code.
+Built with the help of [Claude Code](https://claude.com/claude-code). The code is small and documented, so it is easy to change — by hand or by asking Claude Code.
 
 ### License
 
