@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.adhantv.audio.AdhanVoice
 import app.adhantv.prayer.Method
+import app.adhantv.ui.theme.Theme
 import app.adhantv.prayer.Prayer
 import app.adhantv.prayer.ScheduleSettings
 import kotlinx.coroutines.Dispatchers
@@ -23,14 +24,6 @@ import java.time.Instant
 import java.util.TimeZone
 
 private val Context.store by preferencesDataStore("settings")
-
-/** Colour of the countdown line on the adhan screen. */
-enum class BarColor(val argb: Long, val label: String) {
-    GOLD(0xFFBBA27A, "ذهبي"),
-    WHITE(0xFFE8E6E1, "أبيض"),
-    GREEN(0xFF6CC08F, "أخضر"),
-    BLUE(0xFF7FA8E6, "أزرق"),
-}
 
 /** Text size on the adhan screen, for how far the sofa is from the TV. */
 enum class TextSize(val scale: Float, val label: String) {
@@ -60,10 +53,11 @@ data class AppSettings(
     val iqamaEnabled: Boolean = true,
     val iqamaMinutes: Map<Prayer, Int> = ScheduleSettings.DEFAULT_IQAMA,
     val iqamaSeconds: Int = 30,
-    val barColor: BarColor = BarColor.GOLD,
+    val theme: Theme = Theme.GOLD,
     val showBar: Boolean = true,
     val textSize: TextSize = TextSize.MEDIUM,
     val showNext: Boolean = false,
+    val onboarded: Boolean = false,
     val pausedUntil: Instant? = null,
 ) {
     val schedule: ScheduleSettings
@@ -116,6 +110,7 @@ class SettingsRepository(private val context: Context, private val cities: Citie
         val row = p[K.cityRow]
         p.clear()
         row?.let { p[K.cityRow] = it }
+        p[K.onboarded] = true
     }
 
     private fun read(p: Preferences): AppSettings {
@@ -133,10 +128,11 @@ class SettingsRepository(private val context: Context, private val cities: Citie
             iqamaEnabled = p[K.iqamaOn] ?: d.iqamaEnabled,
             iqamaMinutes = Prayer.entries.associateWith { p[K.iqama(it)] ?: d.iqamaMinutes.getValue(it) },
             iqamaSeconds = p[K.iqamaSeconds] ?: d.iqamaSeconds,
-            barColor = p[K.barColor]?.let { enumOr(it, d.barColor) } ?: d.barColor,
+            theme = p[K.theme]?.let { enumOr(it, d.theme) } ?: d.theme,
             showBar = p[K.showBar] ?: d.showBar,
             textSize = p[K.textSize]?.let { enumOr(it, d.textSize) } ?: d.textSize,
             showNext = p[K.showNext] ?: d.showNext,
+            onboarded = p[K.onboarded] ?: d.onboarded,
             pausedUntil = p[K.pausedUntil]?.let(Instant::ofEpochMilli),
         )
     }
@@ -151,10 +147,11 @@ class SettingsRepository(private val context: Context, private val cities: Citie
         p[K.iqamaOn] = s.iqamaEnabled
         s.iqamaMinutes.forEach { (prayer, min) -> p[K.iqama(prayer)] = min }
         p[K.iqamaSeconds] = s.iqamaSeconds
-        p[K.barColor] = s.barColor.name
+        p[K.theme] = s.theme.name
         p[K.showBar] = s.showBar
         p[K.textSize] = s.textSize.name
         p[K.showNext] = s.showNext
+        p[K.onboarded] = s.onboarded
         s.pausedUntil?.let { p[K.pausedUntil] = it.toEpochMilli() } ?: p.remove(K.pausedUntil)
     }
 
@@ -177,10 +174,11 @@ class SettingsRepository(private val context: Context, private val cities: Citie
         val voice = stringPreferencesKey("voice")
         val iqamaOn = booleanPreferencesKey("iqama_on")
         val iqamaSeconds = intPreferencesKey("iqama_seconds")
-        val barColor = stringPreferencesKey("bar_color")
+        val theme = stringPreferencesKey("theme")
         val showBar = booleanPreferencesKey("show_bar")
         val textSize = stringPreferencesKey("text_size")
         val showNext = booleanPreferencesKey("show_next")
+        val onboarded = booleanPreferencesKey("onboarded")
         val pausedUntil = longPreferencesKey("paused_until")
         fun iqama(p: Prayer) = intPreferencesKey("iqama_${p.name}")
     }

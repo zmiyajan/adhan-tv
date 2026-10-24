@@ -20,5 +20,9 @@ Test on a real TV with the debug trigger:
 adb shell am broadcast -a app.adhantv.TEST -n app.adhantv/.schedule.TestReceiver --ei delay 60 --ei seconds 30
 ```
 
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) — `feat: …`, `fix: …`,
+`docs: …` — because the version number and CHANGELOG.md are generated from them (release-please). Never edit
+`version.txt` or the changelog by hand.
+
 Code: Kotlin, Compose for TV, no DI framework, comments explain *why*. UI text is Arabic first.
-By contributing you agree your work is licensed under GPL-3.0-or-later.
+By contributing you agree your work is licensed under the MIT licence.

@@ -2,6 +2,7 @@ package app.adhantv.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -22,12 +25,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.foundation.focusGroup
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -36,11 +41,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.DenseListItem
-import androidx.tv.material3.ListItem
 import androidx.tv.material3.Text
 import app.adhantv.audio.AdhanVoice
 import app.adhantv.data.AppSettings
-import app.adhantv.data.BarColor
 import app.adhantv.data.Cities
 import app.adhantv.data.City
 import app.adhantv.data.Hijri
@@ -55,23 +58,41 @@ import app.adhantv.ui.arabic
 import app.adhantv.ui.clockText
 import app.adhantv.ui.theme.Fonts
 import app.adhantv.ui.theme.Palette
+import app.adhantv.ui.theme.Theme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 private enum class Section(val title: String) {
     TODAY("اليوم"),
-    PRAYERS("الصلوات"),
+    CITY("المدينة والصلوات"),
     ADHAN("الأذان"),
     IQAMA("الإقامة"),
     LOOK("الشكل"),
     PAUSE("إيقاف مؤقت"),
-    CHECK("الأذونات"),
+    PERMISSIONS("الأذونات"),
     ABOUT("عن البرنامج"),
 }
 
-/** Menu on the right (RTL), the chosen section's settings beside it. Every row works with the remote's OK. */
+/** Everything the screen can ask the activity to do. */
+class HomeActions(
+    val change: ((AppSettings) -> AppSettings) -> Unit,
+    val locate: () -> Unit,
+    val pick: (City) -> Unit,
+    val tryEvent: (Event.Kind) -> Unit,
+    val board: () -> Unit,
+    val radio: () -> Unit,
+    val overApps: () -> Unit,
+    val exact: () -> Unit,
+    val locationSettings: () -> Unit,
+    val restart: () -> Unit,
+    val reset: () -> Unit,
+    val finishOnboarding: () -> Unit,
+)
+
+/** Menu on the right (RTL), the chosen section beside it. Every row works with the remote's OK. */
 @Composable
 fun HomeScreen(
     settings: SettingsRepository,
@@ -80,67 +101,76 @@ fun HomeScreen(
     hijri: Hijri,
     status: String?,
     resumes: Int,
-    onChange: ((AppSettings) -> AppSettings) -> Unit,
-    onLocate: () -> Unit,
-    onPick: (City) -> Unit,
-    onTry: (Event.Kind) -> Unit,
-    onOverApps: () -> Unit,
-    onExact: () -> Unit,
-    onBoard: () -> Unit,
-    onRadio: () -> Unit,
-    onRestart: () -> Unit,
-    onReset: () -> Unit,
+    version: String,
+    act: HomeActions,
 ) {
     val s = settings.settings.collectAsState(initial = null).value ?: return
     var picking by remember { mutableStateOf(false) }
     var section by remember { mutableStateOf(Section.TODAY) }
+    val list = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val menu = remember { FocusRequester() }
+    var inPane by remember { mutableStateOf(false) }
+    LaunchedEffect(section) { list.scrollToItem(0) }
+    // Back from the settings pane goes to the menu; Back from the menu leaves the app as usual.
+    BackHandler(enabled = inPane && s.onboarded) { menu.requestFocus() }
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Box(Modifier.fillMaxSize().background(Palette.bgEdge)) {
-            if (picking) {
-                CityPicker(cities, s.city.country, onPick = { onPick(it); picking = false }, onBack = { picking = false })
-                return@Box
-            }
-            Row(Modifier.fillMaxSize()) {
-                Column(
-                    // Coming back from the settings pane lands on the section you were in, not the nearest item.
-                    Modifier.width(250.dp).fillMaxHeight().background(Palette.bgCentre).padding(vertical = 26.dp, horizontal = 14.dp)
-                        .focusRestorer().focusGroup(),
-                ) {
-                    Text(
-                        "أذان التلفاز",
-                        style = TextStyle(fontFamily = Fonts.amiri, fontSize = 28.sp, color = Palette.gold),
-                        modifier = Modifier.padding(start = 14.dp, bottom = 10.dp),
-                    )
-                    Section.entries.forEach { sec ->
-                        DenseListItem(
-                            selected = section == sec,
-                            onClick = { section = sec },
-                            modifier = Modifier.onFocusChanged { if (it.isFocused) section = sec },
-                            headlineContent = { Text(sec.title, style = TextStyle(fontFamily = Fonts.plex, fontSize = 18.sp)) },
+            when {
+                picking -> CityPicker(cities, s.city.country, onPick = { act.pick(it); picking = false }, onBack = { picking = false })
+                !s.onboarded -> Onboarding(s, status, resumes, act) { picking = true }
+                else -> Row(Modifier.fillMaxSize()) {
+                    Column(
+                        // Coming back from the settings pane lands on the section you were in, not the nearest item.
+                        Modifier.width(185.dp).fillMaxHeight().background(Palette.panel).padding(vertical = 22.dp, horizontal = 8.dp)
+                            .focusRequester(menu).focusRestorer().focusGroup(),
+                    ) {
+                        Text(
+                            "أذان التلفاز",
+                            style = TextStyle(fontFamily = Fonts.amiri, fontSize = 22.sp, color = Palette.gold),
+                            modifier = Modifier.padding(start = 12.dp, bottom = 10.dp),
+                        )
+                        Box(Modifier.padding(horizontal = 12.dp).fillMaxWidth().height(1.dp).background(Palette.gold.copy(alpha = .35f)))
+                        Spacer(Modifier.height(10.dp))
+                        Section.entries.forEach { sec ->
+                            DenseListItem(
+                                selected = section == sec,
+                                onClick = {
+                                    section = sec
+                                    scope.launch { list.animateScrollToItem(0) }   // pressing a section always shows its top
+                                },
+                                modifier = Modifier.onFocusChanged { if (it.isFocused) section = sec },
+                                headlineContent = { Text(sec.title, style = TextStyle(fontFamily = Fonts.plex, fontSize = 16.sp), maxLines = 1) },
+                            )
+                        }
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            "الإصدار $version",
+                            style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute),
+                            modifier = Modifier.padding(start = 12.dp),
                         )
                     }
-                }
-                LazyColumn(
-                    Modifier.weight(1f).fillMaxHeight().padding(horizontal = 40.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    item { Spacer(Modifier.height(34.dp)) }
-                    item { Text(section.title, style = TextStyle(fontFamily = Fonts.amiri, fontSize = 30.sp, color = Palette.ink)) }
-                    item { Spacer(Modifier.height(10.dp)) }
-                    when (section) {
-                        Section.TODAY -> item { Today(s, scheduler, hijri, onTry, onBoard, onRadio) }
-                        Section.PRAYERS -> item { Prayers(s, onChange, onLocate) { picking = true } }
-                        Section.ADHAN -> item { Adhan(s, onChange) }
-                        Section.IQAMA -> item { Iqama(s, onChange) }
-                        Section.LOOK -> item { Look(s, onChange) }
-                        Section.PAUSE -> item { Pause(s, onChange) }
-                        Section.CHECK -> item { Check(resumes, onOverApps, onExact, onRestart, onReset) }
-                        Section.ABOUT -> item { About() }
-                    }
-                    status?.let { msg ->
-                        item { Text(msg, style = TextStyle(fontFamily = Fonts.plex, fontSize = 18.sp, color = Palette.gold), modifier = Modifier.padding(top = 14.dp)) }
-                    }
-                    item { Spacer(Modifier.height(34.dp)) }
+                    CompositionLocalProvider(LocalScrollTop provides { scope.launch { list.animateScrollToItem(0) } }) { LazyColumn(
+                        Modifier.weight(1f).fillMaxHeight().padding(horizontal = 40.dp).onFocusChanged { inPane = it.hasFocus },
+                        state = list,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        item { Spacer(Modifier.height(30.dp)) }
+                        item { Text(section.title, style = TextStyle(fontFamily = Fonts.amiri, fontSize = 30.sp, color = Palette.ink)) }
+                        item { Spacer(Modifier.height(8.dp)) }
+                        when (section) {
+                            Section.TODAY -> item { Today(s, scheduler, hijri, act) }
+                            Section.CITY -> item { CityAndPrayers(s, resumes, act) { picking = true } }
+                            Section.ADHAN -> item { Adhan(s, act) }
+                            Section.IQAMA -> item { Iqama(s, act) }
+                            Section.LOOK -> item { Look(s, act) }
+                            Section.PAUSE -> item { Pause(s, act) }
+                            Section.PERMISSIONS -> item { PermissionsPane(resumes, act) }
+                            Section.ABOUT -> item { About(version, act) }
+                        }
+                        status?.let { msg -> item { Note(msg, Palette.gold) } }
+                        item { Spacer(Modifier.height(30.dp)) }
+                    } }
                 }
             }
         }
@@ -148,14 +178,12 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Today(
-    s: AppSettings,
-    scheduler: AlarmScheduler,
-    hijri: Hijri,
-    onTry: (Event.Kind) -> Unit,
-    onBoard: () -> Unit,
-    onRadio: () -> Unit,
-) {
+fun Note(text: String, color: Color = Palette.mute, size: Int = 18) {
+    Text(text, style = TextStyle(fontFamily = Fonts.plex, fontSize = size.sp, color = color), modifier = Modifier.padding(vertical = 8.dp))
+}
+
+@Composable
+private fun Today(s: AppSettings, scheduler: AlarmScheduler, hijri: Hijri, act: HomeActions) {
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -171,26 +199,23 @@ private fun Today(
     val next = remember(s, now) { schedule.next(now) }
     val h = hijri.of(date)
 
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(
-            "${s.city.name}${if (s.cityConfirmed) "" else " (تقديري)"} · ${h.day} ${Hijri.MONTHS[h.month - 1]} ${h.year}",
-            style = TextStyle(fontFamily = Fonts.plex, fontSize = 18.sp, color = Palette.mute),
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Note("${s.city.name} · ${h.day} ${Hijri.MONTHS[h.month - 1]} ${h.year}")
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Prayer.entries.forEach { p ->
                 val friday = events.firstOrNull { it.prayer == p }?.jumuah == true
                 val iqama = events.firstOrNull { it.prayer == p && it.kind == Event.Kind.IQAMA }
                 val isNext = next?.prayer == p && next.at.atZone(zone).toLocalDate() == date
                 val off = p !in s.enabled
+                val shape = RoundedCornerShape(14.dp)
                 Column(
-                    Modifier.weight(1f).background(Palette.bgCentre, RoundedCornerShape(14.dp))
-                        .then(if (isNext) Modifier.border(2.dp, Palette.gold, RoundedCornerShape(14.dp)) else Modifier)
+                    Modifier.weight(1f).background(Palette.panel, shape)
+                        .then(if (isNext) Modifier.border(2.dp, Palette.gold, shape) else Modifier)
                         .padding(vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    val c = if (off) Palette.mute else Palette.ink
                     Text(p.arabic(friday), style = TextStyle(fontFamily = Fonts.plex, fontSize = 17.sp, color = Palette.mute))
-                    Text(day[p].clockText(zone), style = TextStyle(fontFamily = Fonts.plex, fontSize = 22.sp, color = c), maxLines = 1)
+                    Text(day[p].clockText(zone), style = TextStyle(fontFamily = Fonts.plex, fontSize = 22.sp, color = if (off) Palette.mute else Palette.ink), maxLines = 1)
                     Text(
                         when {
                             off -> "متوقف"
@@ -203,156 +228,145 @@ private fun Today(
                 }
             }
         }
-        if (s.paused(now)) {
-            Text("الأذان موقوف مؤقتاً لين ${s.pausedUntil!!.clockText(zone)}", style = TextStyle(fontFamily = Fonts.plex, fontSize = 18.sp, color = Palette.live))
-        } else {
-            next?.let {
-                val what = if (it.kind == Event.Kind.IQAMA) "إقامة" else "أذان"
-                Text("القادم: $what ${it.prayer.arabic(it.jumuah)} ${it.at.clockText(zone)}", style = TextStyle(fontFamily = Fonts.plex, fontSize = 18.sp, color = Palette.gold))
+        when {
+            s.paused(now) -> Note("الأذان موقوف مؤقتاً لين ${s.pausedUntil!!.clockText(zone)}", Palette.live)
+            next != null -> {
+                val what = if (next.kind == Event.Kind.IQAMA) "إقامة" else "أذان"
+                Note("القادم: $what ${next.prayer.arabic(next.jumuah)} ${next.at.clockText(zone)}", Palette.gold)
             }
         }
         Column {
-            ActionRow("شاشة المسجد", "الساعة وأوقات اليوم والعدّ التنازلي بالشاشة كاملة، تقدر تخليها شغّالة طول اليوم", onBoard)
-            ActionRow("استمع لإذاعة القرآن الكريم", "مباشر، وتوقف وقت الأذان", onRadio)
-            ActionRow("جرّب الأذان", "يطلع الأذان الحين بالشكل والصوت الحالي") { onTry(Event.Kind.ADHAN) }
-            ActionRow("جرّب الإقامة") { onTry(Event.Kind.IQAMA) }
+            ActionRow("شاشة المسجد", "الساعة والأوقات والعدّ التنازلي بالشاشة كاملة", top = true, onClick = act.board)
+            ActionRow("إذاعة القرآن الكريم", "استمع مباشر، وتوقف وقت الأذان", onClick = act.radio)
+            ActionRow("جرّب الأذان", "يطلع الأذان الحين بالشكل والصوت الحالي") { act.tryEvent(Event.Kind.ADHAN) }
         }
     }
 }
 
 @Composable
-private fun Prayers(s: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit, onLocate: () -> Unit, onChooseCity: () -> Unit) {
+private fun CityAndPrayers(s: AppSettings, resumes: Int, act: HomeActions, onChooseCity: () -> Unit) {
+    val context = LocalContext.current
+    val located = remember(resumes) { Permissions.canLocate(context) }
     Column {
+        ActionRow("المدينة: ${s.city.name}", "اضغط عشان تختار من القائمة", top = true, onClick = onChooseCity)
+        ActionRow("حدّد مدينتي تلقائياً", "من الواي فاي، مرة وحدة، والموقع ما يطلع من التلفزيون", onClick = act.locate)
+        ToggleRow("إذن الموقع", located, if (located) "اضغط عشان توقفه من إعدادات التلفزيون" else "يُطلب بس لما تضغط «حدّد مدينتي»") {
+            if (located) act.locationSettings() else act.locate()
+        }
+        ChoiceRow("طريقة الحساب", s.method, Method.entries, { it.arabic }, "أم القرى هي التقويم الرسمي في السعودية") { m -> act.change { it.copy(method = m) } }
+        Spacer(Modifier.height(10.dp))
         Prayer.entries.forEach { p ->
-            ToggleRow("أذان ${p.arabic()}", p in s.enabled) { on -> onChange { it.copy(enabled = if (on) it.enabled + p else it.enabled - p) } }
+            ToggleRow("أذان ${p.arabic()}", p in s.enabled) { on -> act.change { it.copy(enabled = if (on) it.enabled + p else it.enabled - p) } }
         }
-        ActionRow("المدينة: ${s.city.name}", "اختر من القائمة", onChooseCity)
-        ActionRow("حدّد مدينتي تلقائياً", "يطلب إذن الموقع التقريبي مرة وحدة، والموقع ما يطلع من التلفزيون", onLocate)
-        ChoiceRow("طريقة الحساب", s.method, Method.entries, { it.arabic }, "أم القرى هي التقويم الرسمي في السعودية") { m -> onChange { it.copy(method = m) } }
     }
 }
 
 @Composable
-private fun Adhan(s: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit) {
+private fun Adhan(s: AppSettings, act: HomeActions) {
     Column {
-        ChoiceRow("صوت الأذان المسجّل", s.voice, AdhanVoice.entries, { it.label }, "الأذان المسجّل يبقى على الشاشة طول مدة التسجيل") { v ->
-            onChange { it.copy(voice = v) }
-        }
-        ChoiceRow("مدة الأذان مع الإذاعة", s.adhanMinutes, listOf(1, 2, 3, 4, 5), { minutes(it) }) { v -> onChange { it.copy(adhanMinutes = v) } }
         ChoiceRow(
-            "مصدر الصوت", s.source, SoundSource.entries, { it.label },
-            "الآن: ${if (s.useRadio) "إذاعة القرآن الكريم مباشر" else "أذان الحرم المسجّل"}. لو ما فيه نت يشتغل المسجّل",
-        ) { v -> onChange { it.copy(source = v) } }
+            "الصوت", s.source, SoundSource.entries, { it.label },
+            "الحين: ${if (s.useRadio) "إذاعة القرآن الكريم مباشر" else "أذان مسجّل"}. ولو انقطع النت يشتغل المسجّل",
+            top = true,
+        ) { v -> act.change { it.copy(source = v) } }
+        ChoiceRow("الأذان المسجّل", s.voice, AdhanVoice.entries, { it.label }, "يبقى على الشاشة طول مدة التسجيل") { v -> act.change { it.copy(voice = v) } }
+        ChoiceRow("مدة الأذان مع الإذاعة", s.adhanMinutes, listOf(1, 2, 3, 4, 5), { minutes(it) }) { v -> act.change { it.copy(adhanMinutes = v) } }
+        Spacer(Modifier.height(10.dp))
         Prayer.entries.forEach { p ->
-            ToggleRow("صوت أذان ${p.arabic()}", p in s.sound) { on ->
-                onChange { it.copy(sound = if (on) it.sound + p else it.sound - p) }
-            }
+            ToggleRow("صوت أذان ${p.arabic()}", p in s.sound) { on -> act.change { it.copy(sound = if (on) it.sound + p else it.sound - p) } }
         }
     }
 }
 
 @Composable
-private fun Iqama(s: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit) {
+private fun Iqama(s: AppSettings, act: HomeActions) {
     Column {
-        ToggleRow("تنبيه الإقامة", s.iqamaEnabled, "صورة بدون صوت. ما فيه إقامة لصلاة الجمعة") { on -> onChange { it.copy(iqamaEnabled = on) } }
+        ToggleRow("تنبيه الإقامة", s.iqamaEnabled, "شاشة بدون صوت. ما فيه إقامة لصلاة الجمعة", top = true) { on -> act.change { it.copy(iqamaEnabled = on) } }
         Prayer.entries.forEach { p ->
-            ChoiceRow("إقامة ${p.arabic()} بعد الأذان", s.iqamaMinutes.getValue(p), (5..45 step 5).toList(), { minutesShort(it) }) { v ->
-                onChange { it.copy(iqamaMinutes = it.iqamaMinutes + (p to v)) }
+            ChoiceRow("${p.arabic()} بعد الأذان", s.iqamaMinutes.getValue(p), (5..45 step 5).toList(), { "$it دقيقة" }) { v ->
+                act.change { it.copy(iqamaMinutes = it.iqamaMinutes + (p to v)) }
             }
         }
-        ChoiceRow("مدة شاشة الإقامة", s.iqamaSeconds, listOf(15, 30, 60), { "$it ثانية" }) { v -> onChange { it.copy(iqamaSeconds = v) } }
+        ChoiceRow("مدة شاشة الإقامة", s.iqamaSeconds, listOf(15, 30, 60), { "$it ثانية" }) { v -> act.change { it.copy(iqamaSeconds = v) } }
+        ActionRow("جرّب الإقامة") { act.tryEvent(Event.Kind.IQAMA) }
     }
 }
 
 @Composable
-private fun Look(s: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit) {
+private fun Look(s: AppSettings, act: HomeActions) {
     Column {
-        ToggleRow("خط العدّ التنازلي", s.showBar, "خط يقصر لين تخلص الشاشة") { on -> onChange { it.copy(showBar = on) } }
-        ChoiceRow("لون الخط", s.barColor, BarColor.entries, { it.label }, swatch = { Color(it.argb) }) { v -> onChange { it.copy(barColor = v) } }
-        ChoiceRow("حجم الكلام", s.textSize, TextSize.entries, { it.label }, "حسب بُعد الكنبة عن التلفزيون") { v -> onChange { it.copy(textSize = v) } }
-        ToggleRow("سطر الصلاة القادمة", s.showNext, "مثل «القادم: أذان العصر 3:23 م» تحت الآية") { on -> onChange { it.copy(showNext = on) } }
+        ChoiceRow("اللون", s.theme, Theme.entries, { it.label }, "للبرنامج كله وشاشة الأذان", swatch = { Color(it.accent) }, top = true) { v -> act.change { it.copy(theme = v) } }
+        ChoiceRow("حجم الكلام", s.textSize, TextSize.entries, { it.label }, "حسب بُعد الكنبة عن التلفزيون") { v -> act.change { it.copy(textSize = v) } }
+        ToggleRow("خط العدّ التنازلي", s.showBar, "خط يقصر لين تخلص الشاشة") { on -> act.change { it.copy(showBar = on) } }
+        ToggleRow("سطر الصلاة القادمة", s.showNext, "تحت الآية في شاشة الأذان") { on -> act.change { it.copy(showNext = on) } }
     }
 }
 
 @Composable
-private fun Pause(s: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit) {
+private fun Pause(s: AppSettings, act: HomeActions) {
     val zone = s.city.place.zone
     Column {
-        Text(
-            if (s.paused()) "موقوف لين ${s.pausedUntil!!.clockText(zone)}" else "الأذان شغّال",
-            style = TextStyle(fontFamily = Fonts.plex, fontSize = 18.sp, color = if (s.paused()) Palette.live else Palette.mute),
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
-        ActionRow("أوقفه ساعة") { onChange { it.copy(pausedUntil = Instant.now().plus(1, ChronoUnit.HOURS)) } }
-        ActionRow("أوقفه ساعتين") { onChange { it.copy(pausedUntil = Instant.now().plus(2, ChronoUnit.HOURS)) } }
+        Note(if (s.paused()) "موقوف لين ${s.pausedUntil!!.clockText(zone)}" else "الأذان شغّال", if (s.paused()) Palette.live else Palette.mute)
+        ActionRow("أوقفه ساعة", top = true) { act.change { it.copy(pausedUntil = Instant.now().plus(1, ChronoUnit.HOURS)) } }
+        ActionRow("أوقفه ساعتين") { act.change { it.copy(pausedUntil = Instant.now().plus(2, ChronoUnit.HOURS)) } }
         ActionRow("أوقفه لين بكرة", "يرجع يشتغل الساعة 12 بالليل") {
             val midnight = Instant.now().atZone(zone).toLocalDate().plusDays(1).atTime(LocalTime.MIDNIGHT).atZone(zone).toInstant()
-            onChange { it.copy(pausedUntil = midnight) }
+            act.change { it.copy(pausedUntil = midnight) }
         }
-        if (s.paused()) ActionRow("رجّعه الحين") { onChange { it.copy(pausedUntil = null) } }
+        if (s.paused()) ActionRow("رجّعه الحين") { act.change { it.copy(pausedUntil = null) } }
     }
 }
 
 @Composable
-private fun Check(resumes: Int, onOverApps: () -> Unit, onExact: () -> Unit, onRestart: () -> Unit, onReset: () -> Unit) {
-    var confirmReset by remember { mutableStateOf(false) }
+private fun PermissionsPane(resumes: Int, act: HomeActions) {
     val context = LocalContext.current
     val overApps = remember(resumes) { Permissions.canShowOverApps(context) }
     val exact = remember(resumes) { Permissions.canBeExact(context) }
+    val located = remember(resumes) { Permissions.canLocate(context) }
     Column {
-        PermissionRow(overApps, "الظهور فوق التطبيقات", "عشان تطلع شاشة الأذان فوق أي شي شغّال. بدونه يطلع الأذان بس لما يكون البرنامج مفتوح.", onOverApps)
-        PermissionRow(exact, "المنبهات والتذكيرات", "عشان يطلع الأذان في دقيقته بالضبط.", onExact)
+        Note("كل إذن تقدر تشغّله أو توقفه. الضغط يفتح مكانه في إعدادات التلفزيون.", size = 16)
+        ToggleRow("الظهور فوق التطبيقات", overApps, "عشان يطلع الأذان فوق اللي شغّال. بدونه يطلع بس والبرنامج مفتوح", top = true) { act.overApps() }
+        ToggleRow("المنبهات والتذكيرات", exact, "عشان يطلع الأذان في ثانيته") { act.exact() }
+        ToggleRow("الموقع التقريبي", located, "لتحديد المدينة تلقائياً بس") { if (located) act.locationSettings() else act.locate() }
+    }
+}
+
+@Composable
+private fun About(version: String, act: HomeActions) {
+    var confirmReset by remember { mutableStateOf(false) }
+    var open by remember { mutableStateOf<Credit?>(null) }
+    open?.let { c ->
+        AboutDetail(c) { open = null }
+        return
+    }
+    Column {
+        Text(
+            "صدقة جارية عن صاحبه وأسرته، وعن كل من ساهم فيه، إلى يوم الدين.",
+            style = TextStyle(fontFamily = Fonts.amiri, fontSize = 22.sp, color = Palette.gold),
+            modifier = Modifier.padding(bottom = 4.dp),
+        )
+        Text("صُنع بإحسان في مكة المكرمة، بواسطة زياد ميجان.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 17.sp, color = Palette.ink))
+        Note("الإصدار $version · مجاني وبدون إعلانات", size = 16)
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 10.dp)) {
+            Qr(SUGGESTIONS, 130.dp)
+            Spacer(Modifier.width(22.dp))
+            Column {
+                Text("عندك اقتراح أو مشكلة؟", style = TextStyle(fontFamily = Fonts.plex, fontSize = 20.sp, color = Palette.ink))
+                Text("صوّر الرمز بجوالك واكتب لنا.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 15.sp, color = Palette.mute))
+            }
+        }
+        CREDITS.forEachIndexed { i, c -> ActionRow(c.title, c.summary, top = i == 0) { open = c } }
         Spacer(Modifier.height(10.dp))
-        ActionRow("إعادة تشغيل البرنامج", "لو حسّيت إن شي مو طبيعي. ما يغيّر إعداداتك", onRestart)
-        ActionRow(
-            if (confirmReset) "اضغط مرة ثانية للتأكيد" else "رجّع الإعدادات الأصلية",
-            "يرجّع كل الإعدادات مثل أول مرة، ويخلي مدينتك",
-        ) {
-            if (confirmReset) onReset()
+        ActionRow("إعادة تشغيل البرنامج", "لو حسّيت إن شي مو طبيعي. ما يغيّر إعداداتك", onClick = act.restart)
+        ActionRow(if (confirmReset) "اضغط مرة ثانية للتأكيد" else "رجّع الإعدادات الأصلية", "ويخلي مدينتك مثل ما هي") {
+            if (confirmReset) act.reset()
             confirmReset = !confirmReset
         }
     }
 }
 
-@Composable
-private fun PermissionRow(ok: Boolean, title: String, why: String, onFix: () -> Unit) {
-    ListItem(
-        selected = false,
-        onClick = { if (!ok) onFix() },
-        headlineContent = { Text(title, style = TextStyle(fontFamily = Fonts.plex, fontSize = 20.sp)) },
-        supportingContent = { Text(if (ok) why else "$why اضغط عشان تفعّله.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 14.sp)) },
-        trailingContent = {
-            Text(if (ok) "مفعّل ✓" else "غير مفعّل", style = TextStyle(fontFamily = Fonts.plex, fontSize = 18.sp, color = if (ok) Palette.gold else Palette.live))
-        },
-    )
-}
-
-@Composable
-private fun About() {
-    val credits = listOf(
-        "أذان التلفاز" to "برنامج مجاني ومفتوح المصدر بدون إعلانات، برخصة GPL-3.0",
-        "خط المصحف ونص الآيات" to "مجمع الملك فهد لطباعة المصحف الشريف (خط حفص، الملف الأصلي بدون تعديل)",
-        "أوقات الصلاة" to "تقويم أم القرى، بمكتبة adhan من Batoul Apps (رخصة MIT)",
-        "الأذان المسجّل" to "أذان المغرب في المسجد الحرام، تسجيل 3omar Faruq، رخصة CC BY 3.0. قصّينا الأذان من التسجيل وحوّلناه لصوت فقط",
-        "إذاعة القرآن الكريم" to "هيئة الإذاعة والتلفزيون السعودية",
-        "قائمة المدن" to "GeoNames، رخصة CC BY 4.0",
-        "خطوط أميري و IBM Plex" to "رخصة SIL Open Font License",
-    )
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 10.dp)) {
-            Qr(SUGGESTIONS, 140.dp)
-            Spacer(Modifier.width(22.dp))
-            Column {
-                Text("عندك اقتراح أو مشكلة؟", style = TextStyle(fontFamily = Fonts.plex, fontSize = 20.sp, color = Palette.gold))
-                Text("صوّر الرمز بجوالك واكتب لنا.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 15.sp, color = Palette.mute))
-            }
-        }
-        credits.forEach { (title, body) -> ActionRow(title, body) {} }   // focusable, so the remote scrolls the page
-    }
-}
-
 /** Where suggestions and problems go (the project's GitHub issues). */
-private const val SUGGESTIONS = "https://github.com/zmiyajan/adhan-tv/issues/new/choose"
+private const val SUGGESTIONS = "$REPO/issues/new/choose"
 
 private fun minutes(n: Int) = when (n) {
     1 -> "دقيقة"
@@ -360,5 +374,3 @@ private fun minutes(n: Int) = when (n) {
     in 3..10 -> "$n دقايق"
     else -> "$n دقيقة"
 }
-
-private fun minutesShort(n: Int) = "$n د"

@@ -13,8 +13,11 @@ android {
         applicationId = "app.adhantv"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        // One source of truth: version.txt, bumped by release-please from the commit messages.
+        val version = rootProject.file("version.txt").readText().trim()
+        val (major, minor, patch) = version.split(".").map(String::toInt)
+        versionCode = major * 10_000 + minor * 100 + patch
+        versionName = version
     }
 
     // Release signing comes from keystore.properties (never committed); without it, release builds use the debug
@@ -47,6 +50,27 @@ android {
     }
     buildFeatures { compose = true }
     androidResources { localeFilters += listOf("ar", "en") }
+}
+
+/** LICENSE, CHANGELOG.md and licenses/ copied into the APK's assets (legal/), so «عن البرنامج» can show them. */
+abstract class LegalAssets : DefaultTask() {
+    @get:InputFiles abstract val files: ConfigurableFileCollection
+
+    @get:OutputDirectory abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun copy() {
+        val dir = outputDir.get().asFile.resolve("legal").apply { deleteRecursively(); mkdirs() }
+        files.forEach { it.copyTo(dir.resolve(it.name), overwrite = true) }
+    }
+}
+
+val legalAssets = tasks.register<LegalAssets>("legalAssets") {
+    files.from(rootProject.file("LICENSE"), rootProject.file("CHANGELOG.md"), rootProject.fileTree("licenses"))
+}
+
+androidComponents {
+    onVariants { it.sources.assets?.addGeneratedSourceDirectory(legalAssets, LegalAssets::outputDir) }
 }
 
 dependencies {

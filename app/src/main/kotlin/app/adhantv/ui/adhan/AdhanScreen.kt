@@ -56,7 +56,7 @@ fun AdhanScreen(event: Event, verse: Verses.Verse, showMs: Long, settings: AppSe
         val density = LocalDensity.current
         val scale = settings.textSize.scale
         fun text(px: Float): TextUnit = with(density) { (u * px * scale).toSp() }
-        val barColor = Color(settings.barColor.argb)
+        val barColor = Palette.gold
         val zone = settings.city.place.zone
         val adhan = event.kind == Event.Kind.ADHAN
         val widthPx = with(density) { maxWidth.toPx() }

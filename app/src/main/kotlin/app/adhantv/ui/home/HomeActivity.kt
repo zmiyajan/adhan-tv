@@ -46,31 +46,43 @@ class HomeActivity : ComponentActivity() {
                     hijri = container.hijri,
                     status = status,
                     resumes = resumes,
-                    onChange = { change ->
-                        lifecycleScope.launch {
-                            container.settings.update(change)
-                            container.scheduler.armNext()
-                        }
-                    },
-                    onLocate = { askLocation.launch(Manifest.permission.ACCESS_COARSE_LOCATION) },
-                    onPick = ::choose,
-                    onTry = { kind -> startActivity(AdhanActivity.intent(this, Event(Prayer.MAGHRIB, kind, Instant.now(), false))) },
-                    onOverApps = {
-                        if (!Permissions.openOverAppsSettings(this)) status = "افتح الإعدادات ← التطبيقات ← أذان التلفاز ← الأذونات"
-                    },
-                    onBoard = { startActivity(Intent(this, BoardActivity::class.java)) },
-                    onRadio = { startActivity(Intent(this, RadioActivity::class.java)) },
-                    onRestart = ::restart,
-                    onReset = {
-                        lifecycleScope.launch {
-                            container.settings.reset()
-                            container.scheduler.armNext()
-                            status = "رجعت الإعدادات الأصلية."
-                        }
-                    },
-                    onExact = {
-                        if (!Permissions.openExactAlarmSettings(this)) status = "افتح الإعدادات ← التطبيقات ← الوصول الخاص ← المنبهات والتذكيرات"
-                    },
+                    version = packageManager.getPackageInfo(packageName, 0).versionName.orEmpty(),
+                    act = HomeActions(
+                        change = { change ->
+                            lifecycleScope.launch {
+                                container.settings.update(change)
+                                container.scheduler.armNext()
+                            }
+                        },
+                        locate = {
+                            if (Permissions.canLocate(this)) locate() else askLocation.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                        },
+                        pick = ::choose,
+                        tryEvent = { kind -> startActivity(AdhanActivity.intent(this, Event(Prayer.MAGHRIB, kind, Instant.now(), false))) },
+                        board = { startActivity(Intent(this, BoardActivity::class.java)) },
+                        radio = { startActivity(Intent(this, RadioActivity::class.java)) },
+                        overApps = {
+                            if (!Permissions.openOverAppsSettings(this)) status = "افتح الإعدادات ← التطبيقات ← أذان التلفاز ← الأذونات"
+                        },
+                        exact = {
+                            if (!Permissions.openExactAlarmSettings(this)) status = "افتح الإعدادات ← التطبيقات ← الوصول الخاص ← المنبهات والتذكيرات"
+                        },
+                        locationSettings = {
+                            if (!Permissions.openAppSettings(this)) status = "افتح الإعدادات ← التطبيقات ← أذان التلفاز ← الأذونات"
+                        },
+                        restart = ::restart,
+                        reset = {
+                            lifecycleScope.launch {
+                                container.settings.reset()
+                                container.scheduler.armNext()
+                                status = "رجعت الإعدادات الأصلية."
+                            }
+                        },
+                        finishOnboarding = {
+                            status = null
+                            lifecycleScope.launch { container.settings.update { it.copy(onboarded = true) } }
+                        },
+                    ),
                 )
             }
         }

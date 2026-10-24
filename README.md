@@ -82,9 +82,15 @@ adb shell appops set app.adhantv SYSTEM_ALERT_WINDOW allow
 
 انبنى البرنامج بمساعدة [Claude Code](https://claude.com/claude-code) من Anthropic. الكود مرتّب وموثّق، وكل قرار مشروح في `docs/research`، فتقدر تعدّل عليه بنفسك أو بمساعدة Claude Code: افتح الريبو واطلب التعديل اللي تبغاه بالعربي.
 
+## صدقة جارية
+
+هذا البرنامج صدقة جارية عن صاحبه وأسرته، وعن كل من ساهم فيه، إلى يوم الدين.
+
+صُنع بإحسان في مكة المكرمة، بواسطة زياد ميجان.
+
 ## الرخصة
 
-[GPL-3.0-or-later](LICENSE): تقدر تستخدمه وتعدّله وتنشره، بشرط أي نسخة معدّلة تكون مفتوحة المصدر بنفس الرخصة. للخطوط والمحتوى رخصها الخاصة في مجلد [licenses](licenses).
+[MIT](LICENSE): تقدر تستخدمه وتعدّله وتنشره بحرية. للخطوط والمحتوى رخصها الخاصة في مجلد [licenses](licenses)، ومنها إن خط المصحف ما يتعدّل ولا يُباع.
 
 </div>
 
@@ -119,4 +125,4 @@ Built with the help of [Claude Code](https://claude.com/claude-code). The code i
 
 ### License
 
-GPL-3.0-or-later. Fonts and content keep their own licences; see [CREDITS.md](CREDITS.md) and [licenses/](licenses).
+MIT. Fonts and content keep their own licences (the KFGQPC font may not be modified or sold); see [CREDITS.md](CREDITS.md) and [licenses/](licenses).

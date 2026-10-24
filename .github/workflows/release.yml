@@ -1,0 +1,35 @@
+name: Release
+
+# On every push to main, release-please keeps a "release PR" up to date: it bumps version.txt and writes
+# CHANGELOG.md from the Conventional Commit messages. Merging that PR tags the release and attaches the APK.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - id: rp
+        uses: googleapis/release-please-action@v4
+      - if: steps.rp.outputs.release_created
+        uses: actions/checkout@v4
+      - if: steps.rp.outputs.release_created
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+      - if: steps.rp.outputs.release_created
+        uses: gradle/actions/setup-gradle@v4
+      - if: steps.rp.outputs.release_created
+        name: Build the release APK
+        run: ./gradlew assembleRelease && cp app/build/outputs/apk/release/app-release.apk adhan-tv-${{ steps.rp.outputs.tag_name }}.apk
+      - if: steps.rp.outputs.release_created
+        name: Attach it to the GitHub release
+        run: gh release upload ${{ steps.rp.outputs.tag_name }} adhan-tv-${{ steps.rp.outputs.tag_name }}.apk
+        env:
+          GH_TOKEN: ${{ github.token }}

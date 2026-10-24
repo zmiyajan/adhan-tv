@@ -53,7 +53,7 @@ class BoardActivity : ComponentActivity() {
             var now by remember { mutableStateOf(Instant.now()) }
             LaunchedEffect(Unit) {
                 while (true) {
-                    delay(1000 - System.currentTimeMillis() % 1000)
+                    delay(1000 - System.currentTimeMillis() % 1000 + 15)   // just after the second turns
                     now = Instant.now()
                 }
             }
@@ -111,7 +111,7 @@ class BoardActivity : ComponentActivity() {
         val GREGORIAN: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("ar-u-nu-latn"))
 
         fun countdown(d: Duration): String {
-            val s = d.seconds.coerceAtLeast(0)
+            val s = ((d.toMillis() + 999) / 1000).coerceAtLeast(0)   // round up: 4.2 s left shows 0:05 → 0:04 on time
             return if (s >= 3600) "%d:%02d:%02d".format(Locale.ENGLISH, s / 3600, s / 60 % 60, s % 60)
             else "%d:%02d".format(Locale.ENGLISH, s / 60, s % 60)
         }
