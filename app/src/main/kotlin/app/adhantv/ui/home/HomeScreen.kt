@@ -146,7 +146,7 @@ fun HomeScreen(
                         }
                         Spacer(Modifier.weight(1f))
                         Text(
-                            "الإصدار $version",
+                            "الإصدار $version | صُنع في مكة",
                             style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute, textAlign = TextAlign.Center),
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -353,7 +353,7 @@ private fun About(version: String, act: HomeActions) {
             style = TextStyle(fontFamily = Fonts.amiri, fontSize = 22.sp, color = Palette.gold),
             modifier = Modifier.padding(bottom = 4.dp),
         )
-        Text("صُنع بإحسان في مكة المكرمة، بواسطة زياد ميجان.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 17.sp, color = Palette.ink))
+        Text("صُنع بإحسان في مكة المكرمة، بواسطة زياد مياجان.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 17.sp, color = Palette.ink))
         Note("الإصدار $version · مجاني وبدون إعلانات", size = 16)
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 10.dp)) {
             Qr(SUGGESTIONS, 130.dp)
