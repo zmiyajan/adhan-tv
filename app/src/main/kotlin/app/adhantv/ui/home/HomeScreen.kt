@@ -58,7 +58,6 @@ import app.adhantv.schedule.AlarmScheduler
 import app.adhantv.ui.arabic
 import app.adhantv.ui.clockText
 import app.adhantv.ui.theme.Fonts
-import app.adhantv.ui.theme.KaabaIcon
 import app.adhantv.ui.theme.Palette
 import app.adhantv.ui.theme.Theme
 import kotlinx.coroutines.delay
@@ -153,9 +152,7 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("صُنع في مكة", style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
-                                Spacer(Modifier.width(5.dp))
-                                KaabaIcon(13.dp)
+                                Text("صُنع في مكة 🕋", style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
                             }
                             Text("|", style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
                             Text(version, style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute))
