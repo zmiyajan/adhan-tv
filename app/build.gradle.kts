@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -15,8 +17,25 @@ android {
         versionName = "0.1.0"
     }
 
+    // Release signing comes from keystore.properties (never committed); without it, release builds use the debug
+    // key so they can be tried on a TV.
+    val keystore = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { f ->
+        Properties().apply { f.inputStream().use { load(it) } }
+    }
+    signingConfigs {
+        if (keystore != null) {
+            create("release") {
+                storeFile = rootProject.file(keystore.getProperty("storeFile"))
+                storePassword = keystore.getProperty("storePassword")
+                keyAlias = keystore.getProperty("keyAlias")
+                keyPassword = keystore.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -40,4 +59,5 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.datastore.preferences)
     implementation(libs.media3.exoplayer)
+    implementation(libs.zxing.core)
 }

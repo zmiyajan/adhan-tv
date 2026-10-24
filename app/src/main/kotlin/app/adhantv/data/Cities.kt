@@ -9,10 +9,7 @@ import kotlin.math.pow
 class Cities(private val context: Context) {
     val all: List<City> by lazy {
         context.assets.open("cities.tsv").bufferedReader().useLines { lines ->
-            lines.mapNotNull { line ->
-                val c = line.split('\t')
-                if (c.size < 7) null else City(c[0].toLong(), c[1], c[2], c[3], c[4].toDouble(), c[5].toDouble(), c[6])
-            }.toList()
+            lines.mapNotNull(City::fromRow).toList()
         }
     }
 

@@ -54,9 +54,9 @@ class AdhanActivity : ComponentActivity() {
             val c = container
             val s = c.settings.current()
             val override = intent.getIntExtra(SECONDS, 0) * 1000L
-            val showMs = if (override > 0) override else if (adhan) s.adhanMinutes * 60_000L else s.iqamaSeconds * 1000L
+            val showMs = if (override > 0) override else if (adhan) s.adhanMs(event.prayer) else s.iqamaSeconds * 1000L
             Log.i("AdhanSound", "source=${s.source} city=${s.city.english} radio=${s.useRadio} sound=${event.prayer in s.sound}")
-            if (adhan && event.prayer in s.sound) sound = AdhanSound(this@AdhanActivity, s.useRadio) { live = it }
+            if (adhan && event.prayer in s.sound) sound = AdhanSound(this@AdhanActivity, s.useRadio, s.voice) { live = it }
             val next = if (s.showNext) c.scheduler.schedule(s).next(Instant.now().plusMillis(showMs)) else null
             setContent { AdhanScreen(event, c.verses.adhan, showMs, s, next, live) }
             delay(showMs)

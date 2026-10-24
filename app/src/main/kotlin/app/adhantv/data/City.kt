@@ -21,7 +21,16 @@ data class City(
     /** Arabic name when GeoNames has one, otherwise the English name. */
     val name: String get() = arabic.ifEmpty { english }
 
+    /** One line in the same format as assets/cities.tsv. */
+    fun toRow(): String = listOf(id, arabic, english, country, latitude, longitude, zone).joinToString("\t")
+
     val place: Place get() = Place(latitude, longitude, ZoneId.of(zone))
+
+    companion object {
+        fun fromRow(line: String): City? = line.split('\t').takeIf { it.size >= 7 }?.let { c ->
+            City(c[0].toLong(), c[1], c[2], c[3], c[4].toDouble(), c[5].toDouble(), c[6])
+        }
+    }
 
     /** Within [km] of a (latitude, longitude) point, by great-circle distance. */
     fun near(point: Pair<Double, Double>, km: Double): Boolean {

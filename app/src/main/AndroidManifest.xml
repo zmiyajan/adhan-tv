@@ -44,6 +44,16 @@
             android:taskAffinity=""
             android:theme="@style/Theme.AdhanTv.Fullscreen" />
 
+        <activity
+            android:name=".ui.board.BoardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AdhanTv.Fullscreen" />
+
+        <activity
+            android:name=".ui.radio.RadioActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AdhanTv.Fullscreen" />
+
         <receiver android:name=".schedule.AlarmReceiver" android:exported="false" />
 
         <receiver android:name=".schedule.RescheduleReceiver" android:exported="true">

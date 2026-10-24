@@ -1,6 +1,7 @@
 package app.adhantv.ui.home
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,8 @@ import app.adhantv.data.City
 import app.adhantv.prayer.Event
 import app.adhantv.prayer.Prayer
 import app.adhantv.ui.adhan.AdhanActivity
+import app.adhantv.ui.board.BoardActivity
+import app.adhantv.ui.radio.RadioActivity
 import app.adhantv.ui.theme.AdhanTvTheme
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -30,7 +33,10 @@ class HomeActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycleScope.launch { container.scheduler.armNext() }
+        lifecycleScope.launch {
+            container.settings.migrate()
+            container.scheduler.armNext()
+        }
         setContent {
             AdhanTvTheme {
                 HomeScreen(
@@ -52,6 +58,16 @@ class HomeActivity : ComponentActivity() {
                     onOverApps = {
                         if (!Permissions.openOverAppsSettings(this)) status = "افتح الإعدادات ← التطبيقات ← أذان التلفاز ← الأذونات"
                     },
+                    onBoard = { startActivity(Intent(this, BoardActivity::class.java)) },
+                    onRadio = { startActivity(Intent(this, RadioActivity::class.java)) },
+                    onRestart = ::restart,
+                    onReset = {
+                        lifecycleScope.launch {
+                            container.settings.reset()
+                            container.scheduler.armNext()
+                            status = "رجعت الإعدادات الأصلية."
+                        }
+                    },
                     onExact = {
                         if (!Permissions.openExactAlarmSettings(this)) status = "افتح الإعدادات ← التطبيقات ← الوصول الخاص ← المنبهات والتذكيرات"
                     },
@@ -64,6 +80,15 @@ class HomeActivity : ComponentActivity() {
         super.onResume()
         resumes++
         lifecycleScope.launch { container.scheduler.armNext() }
+    }
+
+    /** Re-arms the alarm and starts the app afresh in a new process. */
+    private fun restart() {
+        lifecycleScope.launch {
+            container.scheduler.armNext()
+            startActivity(Intent(this@HomeActivity, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+            Runtime.getRuntime().exit(0)
+        }
     }
 
     private fun locate() {

@@ -5,13 +5,17 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
-import app.adhantv.R
 
 /**
  * The adhan's sound: the live Quran radio, or the bundled recording. If the radio has not started within
  * [RADIO_TIMEOUT_MS] (no internet, stream down), the recording plays instead, so there is always an adhan.
  */
-class AdhanSound(private val context: Context, radio: Boolean, private val onLive: (Boolean) -> Unit) {
+class AdhanSound(
+    private val context: Context,
+    radio: Boolean,
+    private val voice: AdhanVoice,
+    private val onLive: (Boolean) -> Unit,
+) {
     private var live: LiveRadio? = null
     private var recorded: ExoPlayer? = null
     private val fallback = Runnable { if (live?.playing != true) playRecording() }
@@ -38,7 +42,7 @@ class AdhanSound(private val context: Context, radio: Boolean, private val onLiv
                 AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_SPEECH).build(),
                 false,   // the adhan screen already took audio focus
             )
-            setMediaItem(MediaItem.fromUri("android.resource://${context.packageName}/${R.raw.adhan_haram}"))
+            setMediaItem(MediaItem.fromUri("android.resource://${context.packageName}/${voice.res}"))
             prepare()
             play()
         }

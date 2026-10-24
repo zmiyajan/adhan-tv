@@ -10,12 +10,15 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import app.adhantv.audio.AdhanVoice
 import app.adhantv.prayer.Method
 import app.adhantv.prayer.Prayer
 import app.adhantv.prayer.ScheduleSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.util.TimeZone
 
@@ -53,6 +56,7 @@ data class AppSettings(
     val sound: Set<Prayer> = Prayer.entries.toSet(),
     val adhanMinutes: Int = 4,
     val source: SoundSource = SoundSource.AUTO,
+    val voice: AdhanVoice = AdhanVoice.HARAM,
     val iqamaEnabled: Boolean = true,
     val iqamaMinutes: Map<Prayer, Int> = ScheduleSettings.DEFAULT_IQAMA,
     val iqamaSeconds: Int = 30,
@@ -66,6 +70,10 @@ data class AppSettings(
         get() = ScheduleSettings(method, enabled, iqamaEnabled, iqamaMinutes)
 
     fun paused(now: Instant = Instant.now()): Boolean = pausedUntil?.isAfter(now) == true
+
+    /** How long the adhan stays on screen: the recording's own length, or the chosen minutes for the radio. */
+    fun adhanMs(prayer: Prayer): Long =
+        if (prayer in sound && !useRadio) voice.durationMs + 1_500 else adhanMinutes * 60_000L
 
     /** True when the adhan should play the live radio rather than the recording. */
     val useRadio: Boolean
@@ -92,12 +100,27 @@ class SettingsRepository(private val context: Context, private val cities: Citie
     }
 
     suspend fun setCity(city: City) = context.store.edit {
-        it[K.city] = city.id
+        it[K.cityRow] = city.toRow()
+        it.remove(K.city)
         it.remove(K.method)   // follow the new country's default until the user picks a method
     }
 
+    /** Older versions stored only the city id; store the whole row once so later starts skip the city list. */
+    suspend fun migrate() = withContext(Dispatchers.IO) {
+        val legacy = context.store.data.first()[K.city] ?: return@withContext
+        cities.byId(legacy)?.let { setCity(it) }
+    }
+
+    /** Back to the defaults, keeping the chosen city. */
+    suspend fun reset() = context.store.edit { p ->
+        val row = p[K.cityRow]
+        p.clear()
+        row?.let { p[K.cityRow] = it }
+    }
+
     private fun read(p: Preferences): AppSettings {
-        val chosen = p[K.city]?.let(cities::byId)
+        // The chosen city is stored whole, so starting the app never has to load the 34 000-city list.
+        val chosen = p[K.cityRow]?.let(City::fromRow) ?: p[K.city]?.let(cities::byId)
         val city = chosen ?: guess()
         val d = AppSettings(city, chosen != null, Method.defaultFor(city.country))
         return d.copy(
@@ -106,6 +129,7 @@ class SettingsRepository(private val context: Context, private val cities: Citie
             sound = p[K.sound]?.let(::prayers) ?: d.sound,
             adhanMinutes = p[K.adhanMinutes] ?: d.adhanMinutes,
             source = p[K.source]?.let { enumOr(it, d.source) } ?: d.source,
+            voice = p[K.voice]?.let { enumOr(it, d.voice) } ?: d.voice,
             iqamaEnabled = p[K.iqamaOn] ?: d.iqamaEnabled,
             iqamaMinutes = Prayer.entries.associateWith { p[K.iqama(it)] ?: d.iqamaMinutes.getValue(it) },
             iqamaSeconds = p[K.iqamaSeconds] ?: d.iqamaSeconds,
@@ -123,6 +147,7 @@ class SettingsRepository(private val context: Context, private val cities: Citie
         p[K.sound] = s.sound.map { it.name }.toSet()
         p[K.adhanMinutes] = s.adhanMinutes
         p[K.source] = s.source.name
+        p[K.voice] = s.voice.name
         p[K.iqamaOn] = s.iqamaEnabled
         s.iqamaMinutes.forEach { (prayer, min) -> p[K.iqama(prayer)] = min }
         p[K.iqamaSeconds] = s.iqamaSeconds
@@ -142,12 +167,14 @@ class SettingsRepository(private val context: Context, private val cities: Citie
     private fun guess(): City = cities.largestIn(TimeZone.getDefault().id) ?: cities.byId(MAKKAH)!!
 
     private object K {
-        val city = longPreferencesKey("city_id")
+        val city = longPreferencesKey("city_id")   // older versions: id only
+        val cityRow = stringPreferencesKey("city")
         val method = stringPreferencesKey("method")
         val enabled = stringSetPreferencesKey("enabled")
         val sound = stringSetPreferencesKey("sound")
         val adhanMinutes = intPreferencesKey("adhan_minutes")
         val source = stringPreferencesKey("sound_source")
+        val voice = stringPreferencesKey("voice")
         val iqamaOn = booleanPreferencesKey("iqama_on")
         val iqamaSeconds = intPreferencesKey("iqama_seconds")
         val barColor = stringPreferencesKey("bar_color")

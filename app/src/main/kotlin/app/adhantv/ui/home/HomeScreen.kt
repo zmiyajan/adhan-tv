@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.DenseListItem
 import androidx.tv.material3.ListItem
 import androidx.tv.material3.Text
+import app.adhantv.audio.AdhanVoice
 import app.adhantv.data.AppSettings
 import app.adhantv.data.BarColor
 import app.adhantv.data.Cities
@@ -85,6 +86,10 @@ fun HomeScreen(
     onTry: (Event.Kind) -> Unit,
     onOverApps: () -> Unit,
     onExact: () -> Unit,
+    onBoard: () -> Unit,
+    onRadio: () -> Unit,
+    onRestart: () -> Unit,
+    onReset: () -> Unit,
 ) {
     val s = settings.settings.collectAsState(initial = null).value ?: return
     var picking by remember { mutableStateOf(false) }
@@ -123,13 +128,13 @@ fun HomeScreen(
                     item { Text(section.title, style = TextStyle(fontFamily = Fonts.amiri, fontSize = 30.sp, color = Palette.ink)) }
                     item { Spacer(Modifier.height(10.dp)) }
                     when (section) {
-                        Section.TODAY -> item { Today(s, scheduler, hijri, onTry) }
+                        Section.TODAY -> item { Today(s, scheduler, hijri, onTry, onBoard, onRadio) }
                         Section.PRAYERS -> item { Prayers(s, onChange, onLocate) { picking = true } }
                         Section.ADHAN -> item { Adhan(s, onChange) }
                         Section.IQAMA -> item { Iqama(s, onChange) }
                         Section.LOOK -> item { Look(s, onChange) }
                         Section.PAUSE -> item { Pause(s, onChange) }
-                        Section.CHECK -> item { Check(resumes, onOverApps, onExact) }
+                        Section.CHECK -> item { Check(resumes, onOverApps, onExact, onRestart, onReset) }
                         Section.ABOUT -> item { About() }
                     }
                     status?.let { msg ->
@@ -143,7 +148,14 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Today(s: AppSettings, scheduler: AlarmScheduler, hijri: Hijri, onTry: (Event.Kind) -> Unit) {
+private fun Today(
+    s: AppSettings,
+    scheduler: AlarmScheduler,
+    hijri: Hijri,
+    onTry: (Event.Kind) -> Unit,
+    onBoard: () -> Unit,
+    onRadio: () -> Unit,
+) {
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -200,6 +212,8 @@ private fun Today(s: AppSettings, scheduler: AlarmScheduler, hijri: Hijri, onTry
             }
         }
         Column {
+            ActionRow("شاشة المسجد", "الساعة وأوقات اليوم والعدّ التنازلي بالشاشة كاملة، تقدر تخليها شغّالة طول اليوم", onBoard)
+            ActionRow("استمع لإذاعة القرآن الكريم", "مباشر، وتوقف وقت الأذان", onRadio)
             ActionRow("جرّب الأذان", "يطلع الأذان الحين بالشكل والصوت الحالي") { onTry(Event.Kind.ADHAN) }
             ActionRow("جرّب الإقامة") { onTry(Event.Kind.IQAMA) }
         }
@@ -221,7 +235,10 @@ private fun Prayers(s: AppSettings, onChange: ((AppSettings) -> AppSettings) -> 
 @Composable
 private fun Adhan(s: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit) {
     Column {
-        ChoiceRow("مدة الأذان", s.adhanMinutes, listOf(1, 2, 3, 4, 5), { minutes(it) }) { v -> onChange { it.copy(adhanMinutes = v) } }
+        ChoiceRow("صوت الأذان المسجّل", s.voice, AdhanVoice.entries, { it.label }, "الأذان المسجّل يبقى على الشاشة طول مدة التسجيل") { v ->
+            onChange { it.copy(voice = v) }
+        }
+        ChoiceRow("مدة الأذان مع الإذاعة", s.adhanMinutes, listOf(1, 2, 3, 4, 5), { minutes(it) }) { v -> onChange { it.copy(adhanMinutes = v) } }
         ChoiceRow(
             "مصدر الصوت", s.source, SoundSource.entries, { it.label },
             "الآن: ${if (s.useRadio) "إذاعة القرآن الكريم مباشر" else "أذان الحرم المسجّل"}. لو ما فيه نت يشتغل المسجّل",
@@ -277,13 +294,23 @@ private fun Pause(s: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Un
 }
 
 @Composable
-private fun Check(resumes: Int, onOverApps: () -> Unit, onExact: () -> Unit) {
+private fun Check(resumes: Int, onOverApps: () -> Unit, onExact: () -> Unit, onRestart: () -> Unit, onReset: () -> Unit) {
+    var confirmReset by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val overApps = remember(resumes) { Permissions.canShowOverApps(context) }
     val exact = remember(resumes) { Permissions.canBeExact(context) }
     Column {
         PermissionRow(overApps, "الظهور فوق التطبيقات", "عشان تطلع شاشة الأذان فوق أي شي شغّال. بدونه يطلع الأذان بس لما يكون البرنامج مفتوح.", onOverApps)
         PermissionRow(exact, "المنبهات والتذكيرات", "عشان يطلع الأذان في دقيقته بالضبط.", onExact)
+        Spacer(Modifier.height(10.dp))
+        ActionRow("إعادة تشغيل البرنامج", "لو حسّيت إن شي مو طبيعي. ما يغيّر إعداداتك", onRestart)
+        ActionRow(
+            if (confirmReset) "اضغط مرة ثانية للتأكيد" else "رجّع الإعدادات الأصلية",
+            "يرجّع كل الإعدادات مثل أول مرة، ويخلي مدينتك",
+        ) {
+            if (confirmReset) onReset()
+            confirmReset = !confirmReset
+        }
     }
 }
 
@@ -312,9 +339,20 @@ private fun About() {
         "خطوط أميري و IBM Plex" to "رخصة SIL Open Font License",
     )
     Column {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 10.dp)) {
+            Qr(SUGGESTIONS, 140.dp)
+            Spacer(Modifier.width(22.dp))
+            Column {
+                Text("عندك اقتراح أو مشكلة؟", style = TextStyle(fontFamily = Fonts.plex, fontSize = 20.sp, color = Palette.gold))
+                Text("صوّر الرمز بجوالك واكتب لنا.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 15.sp, color = Palette.mute))
+            }
+        }
         credits.forEach { (title, body) -> ActionRow(title, body) {} }   // focusable, so the remote scrolls the page
     }
 }
+
+/** Where suggestions and problems go (the project's GitHub issues). */
+private const val SUGGESTIONS = "https://github.com/zmiyajan/adhan-tv/issues/new/choose"
 
 private fun minutes(n: Int) = when (n) {
     1 -> "دقيقة"
