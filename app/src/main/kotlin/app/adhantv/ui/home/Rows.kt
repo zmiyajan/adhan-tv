@@ -72,10 +72,10 @@ fun <T> ChoiceRow(
 
 /** A plain action. */
 @Composable
-fun ActionRow(title: String, note: String? = null, top: Boolean = false, onClick: () -> Unit) {
+fun ActionRow(title: String, note: String? = null, top: Boolean = false, modifier: Modifier = Modifier, onClick: () -> Unit) {
     ListItem(
         selected = false,
-        modifier = Modifier.top(top),
+        modifier = modifier.top(top),
         onClick = onClick,
         headlineContent = { Text(title, style = titleStyle) },
         supportingContent = note?.let { { Text(it, style = noteStyle) } },

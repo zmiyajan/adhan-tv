@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -127,8 +128,8 @@ fun HomeScreen(
                     ) {
                         Text(
                             "أذان التلفاز",
-                            style = TextStyle(fontFamily = Fonts.amiri, fontSize = 22.sp, color = Palette.gold),
-                            modifier = Modifier.padding(start = 12.dp, bottom = 10.dp),
+                            style = TextStyle(fontFamily = Fonts.amiri, fontSize = 22.sp, color = Palette.gold, textAlign = TextAlign.Center),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
                         )
                         Box(Modifier.padding(horizontal = 12.dp).fillMaxWidth().height(1.dp).background(Palette.gold.copy(alpha = .35f)))
                         Spacer(Modifier.height(10.dp))
@@ -146,8 +147,8 @@ fun HomeScreen(
                         Spacer(Modifier.weight(1f))
                         Text(
                             "الإصدار $version",
-                            style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute),
-                            modifier = Modifier.padding(start = 12.dp),
+                            style = TextStyle(fontFamily = Fonts.plex, fontSize = 13.sp, color = Palette.mute, textAlign = TextAlign.Center),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                     CompositionLocalProvider(LocalScrollTop provides { scope.launch { list.animateScrollToItem(0) } }) { LazyColumn(
@@ -335,10 +336,17 @@ private fun PermissionsPane(resumes: Int, act: HomeActions) {
 private fun About(version: String, act: HomeActions) {
     var confirmReset by remember { mutableStateOf(false) }
     var open by remember { mutableStateOf<Credit?>(null) }
+    var last by remember { mutableStateOf<Credit?>(null) }
+    val rows = remember { CREDITS.associateWith { FocusRequester() } }
     open?.let { c ->
-        AboutDetail(c) { open = null }
+        AboutDetail(c) {
+            last = c
+            open = null
+        }
         return
     }
+    // Coming back from a page puts the focus on the entry you opened, not at the top of the menu.
+    LaunchedEffect(last) { last?.let { runCatching { rows.getValue(it).requestFocus() } } }
     Column {
         Text(
             "صدقة جارية عن صاحبه وأسرته، وعن كل من ساهم فيه، إلى يوم الدين.",
@@ -355,7 +363,9 @@ private fun About(version: String, act: HomeActions) {
                 Text("صوّر الرمز بجوالك واكتب لنا.", style = TextStyle(fontFamily = Fonts.plex, fontSize = 15.sp, color = Palette.mute))
             }
         }
-        CREDITS.forEachIndexed { i, c -> ActionRow(c.title, c.summary, top = i == 0) { open = c } }
+        CREDITS.forEachIndexed { i, c ->
+            ActionRow(c.title, c.summary, top = i == 0, modifier = Modifier.focusRequester(rows.getValue(c))) { open = c }
+        }
         Spacer(Modifier.height(10.dp))
         ActionRow("إعادة تشغيل البرنامج", "لو حسّيت إن شي مو طبيعي. ما يغيّر إعداداتك", onClick = act.restart)
         ActionRow(if (confirmReset) "اضغط مرة ثانية للتأكيد" else "رجّع الإعدادات الأصلية", "ويخلي مدينتك مثل ما هي") {
