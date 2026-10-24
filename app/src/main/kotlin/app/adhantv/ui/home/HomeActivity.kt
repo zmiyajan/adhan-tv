@@ -3,6 +3,7 @@ package app.adhantv.ui.home
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.net.toUri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,6 +62,11 @@ class HomeActivity : ComponentActivity() {
                         tryEvent = { kind -> startActivity(AdhanActivity.intent(this, Event(Prayer.MAGHRIB, kind, Instant.now(), false))) },
                         board = { startActivity(Intent(this, BoardActivity::class.java)) },
                         radio = { startActivity(Intent(this, RadioActivity::class.java)) },
+                        haramChannel = {
+                            // Opens in the TV's YouTube app; without one, show where to find it.
+                            runCatching { startActivity(Intent(Intent.ACTION_VIEW, HARAM_CHANNEL.toUri())) }
+                                .onFailure { status = "افتح يوتيوب وابحث عن: شبكة الشيخ فاروق حضراوي" }
+                        },
                         overApps = {
                             if (!Permissions.openOverAppsSettings(this)) status = "افتح الإعدادات ← التطبيقات ← أذان التلفاز ← الأذونات"
                         },

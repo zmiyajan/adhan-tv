@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import app.adhantv.R
+import androidx.core.net.toUri
 import java.io.File
 
 /**
@@ -18,16 +19,19 @@ enum class AdhanVoice(val label: String, val res: Int, val durationMs: Long) {
 
     fun uri(context: Context): Uri =
         if (this == CUSTOM && customFile(context).exists()) Uri.fromFile(customFile(context))
-        else Uri.parse("android.resource://${context.packageName}/${HARAM.res}")
+        else "android.resource://${context.packageName}/${HARAM.res}".toUri()
 
     fun durationMs(context: Context): Long =
         if (this == CUSTOM && customFile(context).exists()) {
-            runCatching {
-                MediaMetadataRetriever().use { r ->
-                    r.setDataSource(customFile(context).path)
-                    r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
-                }
-            }.getOrNull() ?: HARAM.durationMs
+            val r = MediaMetadataRetriever()   // not AutoCloseable before API 29
+            try {
+                r.setDataSource(customFile(context).path)
+                r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
+            } catch (e: RuntimeException) {
+                null
+            } finally {
+                r.release()
+            } ?: HARAM.durationMs
         } else {
             HARAM.takeIf { this == CUSTOM }?.durationMs ?: durationMs
         }
