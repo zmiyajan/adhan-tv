@@ -1,11 +1,41 @@
 package app.adhantv.audio
 
+import android.content.Context
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import app.adhantv.R
+import java.io.File
 
 /**
- * The bundled adhan recordings the user can choose from. [durationMs] is the file's length: a recorded adhan
- * stays on screen exactly as long as it plays. Sources and licences are in CREDITS.md.
+ * The adhan recordings the user can choose from. A recorded adhan stays on screen exactly as long as it plays.
+ * Bundled sources and licences are in CREDITS.md. [CUSTOM] is a file the user puts on the TV themselves
+ * (Android/data/app.adhantv/files/adhan.mp3); it never ships with the app.
  */
 enum class AdhanVoice(val label: String, val res: Int, val durationMs: Long) {
     HARAM(label = "المسجد الحرام", res = R.raw.adhan_haram, durationMs = 181_500),
+    CUSTOM(label = "أذانك الخاص", res = 0, durationMs = 0),
+    ;
+
+    fun uri(context: Context): Uri =
+        if (this == CUSTOM && customFile(context).exists()) Uri.fromFile(customFile(context))
+        else Uri.parse("android.resource://${context.packageName}/${HARAM.res}")
+
+    fun durationMs(context: Context): Long =
+        if (this == CUSTOM && customFile(context).exists()) {
+            runCatching {
+                MediaMetadataRetriever().use { r ->
+                    r.setDataSource(customFile(context).path)
+                    r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
+                }
+            }.getOrNull() ?: HARAM.durationMs
+        } else {
+            HARAM.takeIf { this == CUSTOM }?.durationMs ?: durationMs
+        }
+
+    companion object {
+        fun customFile(context: Context) = File(context.getExternalFilesDir(null), "adhan.mp3")
+
+        /** The voices to offer: the user's own file only when it is there. */
+        fun available(context: Context) = entries.filter { it != CUSTOM || customFile(context).exists() }
+    }
 }

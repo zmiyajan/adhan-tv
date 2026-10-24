@@ -42,7 +42,7 @@ class AdhanSound(
                 AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_SPEECH).build(),
                 false,   // the adhan screen already took audio focus
             )
-            setMediaItem(MediaItem.fromUri("android.resource://${context.packageName}/${voice.res}"))
+            setMediaItem(MediaItem.fromUri(voice.uri(context)))
             prepare()
             play()
         }

@@ -66,8 +66,8 @@ data class AppSettings(
     fun paused(now: Instant = Instant.now()): Boolean = pausedUntil?.isAfter(now) == true
 
     /** How long the adhan stays on screen: the recording's own length, or the chosen minutes for the radio. */
-    fun adhanMs(prayer: Prayer): Long =
-        if (prayer in sound && !useRadio) voice.durationMs + 1_500 else adhanMinutes * 60_000L
+    fun adhanMs(prayer: Prayer, recordingMs: Long): Long =
+        if (prayer in sound && !useRadio) recordingMs + 1_500 else adhanMinutes * 60_000L
 
     /** True when the adhan should play the live radio rather than the recording. */
     val useRadio: Boolean
